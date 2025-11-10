@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * DatabaseConnection utility class for managing MySQL connections
+ * DatabaseConnection utility class for managing MySQL connections.
  */
 public class DatabaseConnection {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/CybersecurityDB";
