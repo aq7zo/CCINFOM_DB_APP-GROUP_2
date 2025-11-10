@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controllers.UserDashboardController">
+   <children>
+      <HBox alignment="CENTER_LEFT" spacing="10" styleClass="header">
+         <children>
+            <Label fx:id="welcomeLabel" styleClass="title-label" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="btn-secondary" text="Logout" />
+         </children>
+         <padding>
+            <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+         </padding>
+      </HBox>
+      <Separator />
+      <VBox alignment="CENTER" spacing="20" VBox.vgrow="ALWAYS">
+         <padding>
+            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+         </padding>
+         <children>
+            <Label styleClass="subtitle-label" text="USER DASHBOARD" />
+            <VBox spacing="15" alignment="CENTER">
+               <children>
+                  <Button fx:id="submitIncidentButton" onAction="#handleSubmitIncident" styleClass="btn-primary" text="Submit Incident Report" minWidth="250.0" />
+                  <Button fx:id="uploadEvidenceButton" onAction="#handleUploadEvidence" styleClass="btn-primary" text="Upload Evidence" minWidth="250.0" />
+                  <Button fx:id="viewReportsButton" onAction="#handleViewReports" styleClass="btn-primary" text="View My Reports" minWidth="250.0" />
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>
+

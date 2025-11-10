@@ -1,0 +1,165 @@
+/* Cybersecurity Incident Reporting System - Theme CSS */
+
+:root {
+    -fx-primary-color: #1a73e8;
+    -fx-accent-color: #0d47a1;
+    -fx-success-color: #4caf50;
+    -fx-danger-color: #f44336;
+    -fx-warning-color: #ff9800;
+    -fx-surface-color: #f5f5f5;
+    -fx-text-color: #212121;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+.root {
+    -fx-background-color: -fx-surface-color;
+}
+
+/* Header Styles */
+.header {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+}
+
+/* Label Styles */
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary-color;
+}
+
+.subtitle-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-color;
+}
+
+.header .title-label {
+    -fx-text-fill: white;
+}
+
+/* Button Styles */
+.btn-primary {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: -fx-accent-color;
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #0a3d91;
+}
+
+.btn-secondary {
+    -fx-background-color: #757575;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #616161;
+}
+
+.btn-success {
+    -fx-background-color: -fx-success-color;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.btn-success:hover {
+    -fx-background-color: #45a049;
+}
+
+.btn-danger {
+    -fx-background-color: -fx-danger-color;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #da190b;
+}
+
+/* Input Field Styles */
+.input-field {
+    -fx-font-size: 14px;
+    -fx-padding: 10px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+}
+
+.input-field:focused {
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2px;
+}
+
+/* Table Styles */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5px;
+}
+
+.table-view .column-header {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+/* Card Styles */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-padding: 20px;
+}
+
+/* Separator */
+.separator {
+    -fx-background-color: #cccccc;
+}
+
+/* Alert/Dialog Styles */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: -fx-primary-color;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+

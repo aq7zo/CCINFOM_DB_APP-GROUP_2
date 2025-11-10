@@ -1,4 +1,4 @@
-package model;
+package app.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,13 +42,6 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             System.err.println("Error closing connection: " + e.getMessage());
         }
-    }
-    
-    /**
-     * Set database credentials (for configuration)
-     */
-    public static void setCredentials(String url, String user, String password) {
-        // This can be extended to use a config file or environment variables
     }
 }
 
