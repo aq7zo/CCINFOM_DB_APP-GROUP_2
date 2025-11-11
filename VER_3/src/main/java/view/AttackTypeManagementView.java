@@ -6,7 +6,7 @@ import java.util.Scanner;
 /**
  * Main console menu for the Cybersecurity Incident Reporting System
  */
-public class ConsoleMenu {
+public class AttackTypeManagementView {
     private static Scanner scanner = new Scanner(System.in);
     
     /**
@@ -34,10 +34,10 @@ public class ConsoleMenu {
             
             switch (choice) {
                 case 1:
-                    VictimView.showVictimMenu();
+                    VictimManagementView.showVictimMenu();
                     break;
                 case 2:
-                    PerpetratorView.showPerpetratorMenu();
+                    PerpetratorManagementView.showPerpetratorMenu();
                     break;
                 case 3:
                     showAttackTypeMenu();
