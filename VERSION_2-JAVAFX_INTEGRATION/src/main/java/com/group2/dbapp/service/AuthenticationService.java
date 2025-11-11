@@ -189,5 +189,49 @@ public class AuthenticationService {
         
         return false;
     }
+
+    /**
+     * Send a password reset link or temporary password to the given email.
+     * Currently simulates reset logic (no real email sending).
+     * @param email Administrator's email
+     * @return true if the reset process succeeded, false otherwise
+     */
+    public boolean sendPasswordReset(String email) {
+        if (!ValidationUtils.isValidEmail(email)) {
+            System.err.println("Invalid email format");
+            return false;
+        }
+
+        try {
+            Administrator admin = administratorDAO.findByEmail(email);
+
+            if (admin == null) {
+                System.err.println("No administrator found with that email");
+                return false;
+            }
+
+            // Generate a temporary random password
+            String tempPassword = "Temp" + (int)(Math.random() * 10000);
+            String tempHash = SecurityUtils.hashPassword(tempPassword);
+
+            // Update admin record with the new password hash
+            admin.setPasswordHash(tempHash);
+            boolean updated = administratorDAO.update(admin);
+
+            if (updated) {
+                // Simulate sending an email by printing to console
+                System.out.println("Password reset successful for " + email);
+                System.out.println("Temporary password: " + tempPassword);
+                return true;
+            } else {
+                System.err.println("Failed to update password for reset");
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Database error during password reset: " + e.getMessage());
+            return false;
+        }
+    }
 }
 

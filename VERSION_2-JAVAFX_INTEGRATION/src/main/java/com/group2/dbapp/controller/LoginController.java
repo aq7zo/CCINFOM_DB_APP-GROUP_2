@@ -87,7 +87,7 @@ public class LoginController {
      */
     @FXML
     private void handleForgotPassword() {
-        // openModalWindow("/SceneBuilder/ForgotPassword.fxml", "Reset Password");
+        openModalWindow("/SceneBuilder/ForgotPassword.fxml", "Reset Password");
     }
 
     /**
