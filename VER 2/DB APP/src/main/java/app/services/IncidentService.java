@@ -12,8 +12,8 @@ public class IncidentService {
     private final PerpetratorService perpetratorService = new PerpetratorService();
     private final VictimService victimService = new VictimService();
     
-    public boolean createIncident(int victimID, int perpetratorID, int attackTypeID, 
-                                  Integer adminID, String description) {
+    public int createIncident(int victimID, int perpetratorID, int attackTypeID,
+                              Integer adminID, String description) {
         IncidentReport incident = new IncidentReport(victimID, perpetratorID, attackTypeID, 
                                                      adminID, description, "Pending");
         int id = incidentDAO.insert(incident);
@@ -28,9 +28,9 @@ public class IncidentService {
             // Check for auto-flagging victims
             victimService.checkAndAutoFlagVictims();
             
-            return true;
+            return id;
         }
-        return false;
+        return -1;
     }
     
     public List<IncidentReport> getAllIncidents() {
@@ -47,6 +47,10 @@ public class IncidentService {
     
     public boolean validateIncident(int incidentID, int adminID) {
         return incidentDAO.updateStatus(incidentID, "Validated", adminID);
+    }
+
+    public boolean updateIncidentStatus(int incidentID, String status, Integer adminID) {
+        return incidentDAO.updateStatus(incidentID, status, adminID);
     }
 }
 

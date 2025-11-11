@@ -1,51 +1,225 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controllers.AdminDashboardController">
-   <children>
-      <HBox alignment="CENTER_LEFT" spacing="10" styleClass="header">
+<BorderPane prefHeight="850.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controllers.AdminDashboardController">
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="header" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="18.0" left="32.0" right="32.0" top="18.0" />
+         </padding>
          <children>
-            <Label fx:id="welcomeLabel" styleClass="title-label" />
+            <VBox alignment="CENTER_LEFT" spacing="6.0">
+               <Label fx:id="welcomeLabel" styleClass="title-label" text="Welcome, Analyst" />
+               <HBox alignment="CENTER_LEFT" spacing="8.0">
+                  <Label styleClass="tag" text="Administrator Command Center" />
+                  <Label fx:id="lastSyncLabel" styleClass="body-text" text="Last sync: -" />
+               </HBox>
+            </VBox>
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="btn-secondary" text="Logout" />
+            <Button fx:id="syncNowButton" mnemonicParsing="false" onAction="#handleSync" styleClass="ghost-button" text="Refresh intelligence" />
+            <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" styleClass="btn-secondary" text="Sign out" />
          </children>
-         <padding>
-            <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
-         </padding>
       </HBox>
-      <Separator />
-      <VBox alignment="CENTER" spacing="20" VBox.vgrow="ALWAYS">
+   </top>
+   <center>
+      <VBox spacing="24.0" BorderPane.alignment="CENTER">
          <padding>
-            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+            <Insets bottom="28.0" left="32.0" right="32.0" top="16.0" />
          </padding>
          <children>
-            <Label styleClass="subtitle-label" text="ADMIN DASHBOARD" />
-            <GridPane hgap="15" vgap="15" alignment="CENTER">
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="50.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="50.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="50.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="50.0" vgrow="SOMETIMES" />
-               </rowConstraints>
+            <HBox spacing="18.0">
                <children>
-                  <Button fx:id="manageVictimsButton" onAction="#handleManageVictims" styleClass="btn-primary" text="Manage Victims" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                  <Button fx:id="managePerpetratorsButton" onAction="#handleManagePerpetrators" styleClass="btn-primary" text="Manage Perpetrators" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                  <Button fx:id="manageAttackTypesButton" onAction="#handleManageAttackTypes" styleClass="btn-primary" text="Manage Attack Types" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                  <Button fx:id="viewAllIncidentsButton" onAction="#handleViewAllIncidents" styleClass="btn-primary" text="View All Incidents" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Button fx:id="createIncidentButton" onAction="#handleCreateIncident" styleClass="btn-primary" text="Create Incident Report" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                  <Button fx:id="validateReportsButton" onAction="#handleValidateReports" styleClass="btn-primary" text="Validate Reports" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Button fx:id="generateReportsButton" onAction="#handleGenerateReports" styleClass="btn-primary" text="Generate Reports" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                  <VBox alignment="CENTER_LEFT" spacing="8.0" styleClass="summary-card">
+                     <Label styleClass="subtitle-label" text="Total Reports (30d)" />
+                     <Label fx:id="totalReportsValue" styleClass="summary-value" text="0" />
+                     <Label fx:id="totalReportsTrend" styleClass="summary-trend" text="+0 vs previous 30 days" />
+                  </VBox>
+                  <VBox alignment="CENTER_LEFT" spacing="8.0" styleClass="summary-card">
+                     <Label styleClass="subtitle-label" text="Active Perpetrators" />
+                     <Label fx:id="activePerpetratorsValue" styleClass="summary-value" text="0" />
+                     <Label fx:id="activePerpetratorsTrend" styleClass="summary-trend" text="Threat escalation watch" />
+                  </VBox>
+                  <VBox alignment="CENTER_LEFT" spacing="8.0" styleClass="summary-card">
+                     <Label styleClass="subtitle-label" text="Flagged Victims" />
+                     <Label fx:id="flaggedVictimsValue" styleClass="summary-value" text="0" />
+                     <Label fx:id="flaggedVictimsTrend" styleClass="summary-trend danger" text="Review pending risk checks" />
+                  </VBox>
+                  <VBox alignment="CENTER_LEFT" spacing="8.0" styleClass="summary-card">
+                     <Label styleClass="subtitle-label" text="Verified Evidence" />
+                     <Label fx:id="verifiedEvidenceValue" styleClass="summary-value" text="0" />
+                     <Label fx:id="verifiedEvidenceTrend" styleClass="summary-trend" text="Last 7 days processing" />
+                  </VBox>
                </children>
-            </GridPane>
+            </HBox>
+            <TabPane prefHeight="640.0" prefWidth="1110.0" tabClosingPolicy="UNAVAILABLE">
+               <tabs>
+                  <Tab text="Incident Reports">
+                     <content>
+                        <VBox spacing="18.0" styleClass="tab-content">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <Label styleClass="subtitle-label" text="Operational queue" />
+                                 <Label fx:id="incidentQueueSummary" styleClass="body-text" text="No incidents queued." />
+                                 <Region HBox.hgrow="ALWAYS" />
+                                 <ComboBox fx:id="incidentStatusFilter" prefWidth="180.0" promptText="Filter status" styleClass="combo-box" />
+                                 <Button fx:id="validateSelectedButton" mnemonicParsing="false" onAction="#handleValidateSelectedIncident" styleClass="btn-success" text="Validate selected" />
+                                 <Button fx:id="rejectSelectedButton" mnemonicParsing="false" onAction="#handleRejectSelectedIncident" styleClass="btn-danger" text="Reject selected" />
+                              </HBox>
+                              <TableView fx:id="incidentTable" prefHeight="420.0">
+                                 <columns>
+                                    <TableColumn fx:id="incIdColumn" prefWidth="90.0" text="ID" />
+                                    <TableColumn fx:id="incVictimColumn" prefWidth="160.0" text="Victim" />
+                                    <TableColumn fx:id="incPerpColumn" prefWidth="180.0" text="Perpetrator" />
+                                    <TableColumn fx:id="incAttackColumn" prefWidth="200.0" text="Attack Type" />
+                                    <TableColumn fx:id="incStatusColumn" prefWidth="140.0" text="Status" />
+                                    <TableColumn fx:id="incDateColumn" prefWidth="160.0" text="Reported On" />
+                                    <TableColumn fx:id="incEvidenceColumn" prefWidth="140.0" text="Evidence" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab text="Perpetrator Intelligence">
+                     <content>
+                        <VBox spacing="18.0" styleClass="tab-content">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <Label styleClass="subtitle-label" text="Threat actors overview" />
+                                 <Region HBox.hgrow="ALWAYS" />
+                                 <ComboBox fx:id="threatLevelFilter" prefWidth="200.0" promptText="Threat level filter" styleClass="combo-box" />
+                                 <Button fx:id="escalateThreatButton" mnemonicParsing="false" onAction="#handleEscalateThreat" styleClass="btn-danger" text="Escalate threat" />
+                              </HBox>
+                              <TableView fx:id="perpetratorTable" prefHeight="420.0">
+                                 <columns>
+                                    <TableColumn fx:id="perpIdColumn" prefWidth="80.0" text="ID" />
+                                    <TableColumn fx:id="perpIdentifierColumn" prefWidth="220.0" text="Identifier" />
+                                    <TableColumn fx:id="perpTypeColumn" prefWidth="160.0" text="Type" />
+                                    <TableColumn fx:id="perpThreatColumn" prefWidth="140.0" text="Threat Level" />
+                                    <TableColumn fx:id="perpLastIncidentColumn" prefWidth="160.0" text="Last Incident" />
+                                    <TableColumn fx:id="perpLinkedVictimsColumn" prefWidth="200.0" text="Linked Victims" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab text="Victim Oversight">
+                     <content>
+                        <VBox spacing="18.0" styleClass="tab-content">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <Label styleClass="subtitle-label" text="Victim account posture" />
+                                 <Region HBox.hgrow="ALWAYS" />
+                                 <ComboBox fx:id="victimStatusFilter" prefWidth="180.0" promptText="Status filter" styleClass="combo-box" />
+                                 <Button fx:id="flagVictimButton" mnemonicParsing="false" onAction="#handleFlagVictim" styleClass="btn-warning" text="Flag victim" />
+                                 <Button fx:id="reinstateVictimButton" mnemonicParsing="false" onAction="#handleReinstateVictim" styleClass="btn-success" text="Reinstate victim" />
+                              </HBox>
+                              <TableView fx:id="victimTable" prefHeight="420.0">
+                                 <columns>
+                                    <TableColumn fx:id="victimIdColumn" prefWidth="80.0" text="ID" />
+                                    <TableColumn fx:id="victimNameColumn" prefWidth="200.0" text="Name" />
+                                    <TableColumn fx:id="victimEmailColumn" prefWidth="220.0" text="Email" />
+                                    <TableColumn fx:id="victimStatusColumn" prefWidth="140.0" text="Status" />
+                                    <TableColumn fx:id="victimReportsColumn" prefWidth="140.0" text="Reports Filed" />
+                                    <TableColumn fx:id="victimCreatedColumn" prefWidth="160.0" text="Joined" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab text="Evidence Review">
+                     <content>
+                        <VBox spacing="18.0" styleClass="tab-content">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <Label styleClass="subtitle-label" text="Evidence validation pipeline" />
+                                 <Region HBox.hgrow="ALWAYS" />
+                                 <Button fx:id="verifyEvidenceButton" mnemonicParsing="false" onAction="#handleVerifyEvidence" styleClass="btn-success" text="Mark as verified" />
+                                 <Button fx:id="rejectEvidenceButton" mnemonicParsing="false" onAction="#handleRejectEvidence" styleClass="btn-danger" text="Reject evidence" />
+                              </HBox>
+                              <TableView fx:id="evidenceTable" prefHeight="420.0">
+                                 <columns>
+                                    <TableColumn fx:id="evidenceIdColumn" prefWidth="80.0" text="ID" />
+                                    <TableColumn fx:id="evidenceIncidentColumn" prefWidth="100.0" text="Incident ID" />
+                                    <TableColumn fx:id="evidenceTypeColumn" prefWidth="160.0" text="Type" />
+                                    <TableColumn fx:id="evidencePathColumn" prefWidth="260.0" text="File Path" />
+                                    <TableColumn fx:id="evidenceStatusColumn" prefWidth="140.0" text="Status" />
+                                    <TableColumn fx:id="evidenceSubmittedColumn" prefWidth="160.0" text="Submitted" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+                  <Tab text="Intelligence Reports">
+                     <content>
+                        <VBox spacing="18.0" styleClass="tab-content">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <Label styleClass="subtitle-label" text="Generate analytical outputs" />
+                                 <Region HBox.hgrow="ALWAYS" />
+                                 <ComboBox fx:id="reportMonthSelector" prefWidth="160.0" promptText="Month" styleClass="combo-box" />
+                                 <ComboBox fx:id="reportYearSelector" prefWidth="140.0" promptText="Year" styleClass="combo-box" />
+                                 <Button fx:id="generatePdfButton" mnemonicParsing="false" onAction="#handleGeneratePdf" styleClass="ghost-button" text="Generate PDF" />
+                                 <Button fx:id="exportCsvButton" mnemonicParsing="false" onAction="#handleExportCsv" styleClass="btn-secondary" text="Export CSV" />
+                              </HBox>
+                              <HBox spacing="18.0">
+                                 <children>
+                                    <BarChart fx:id="monthlyTrendChart" prefHeight="320.0" prefWidth="520.0">
+                                       <xAxis>
+                                          <CategoryAxis label="Month" />
+                                       </xAxis>
+                                       <yAxis>
+                                          <NumberAxis label="Reports" />
+                                       </yAxis>
+                                    </BarChart>
+                                    <VBox spacing="12.0" styleClass="card">
+                                       <Label styleClass="subtitle-label" text="Notes & Observations" />
+                                       <TextArea fx:id="intelNotesArea" prefHeight="260.0" prefWidth="320.0" promptText="Capture emerging patterns, attack narratives, or mitigation playbooks." styleClass="text-area" wrapText="true" />
+                                       <Button fx:id="saveIntelNotesButton" mnemonicParsing="false" onAction="#handleSaveIntelNotes" styleClass="btn-primary" text="Save briefing notes" />
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                              <ScrollPane fitToWidth="true" prefHeight="120.0" styleClass="card-outline">
+                                 <content>
+                                    <VBox spacing="8.0">
+                                       <Label styleClass="subtitle-label" text="Top insights" />
+                                       <ListView fx:id="intelInsightsList" prefHeight="80.0" />
+                                    </VBox>
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+               </tabs>
+            </TabPane>
          </children>
       </VBox>
-   </children>
-</VBox>
+   </center>
+</BorderPane>
 

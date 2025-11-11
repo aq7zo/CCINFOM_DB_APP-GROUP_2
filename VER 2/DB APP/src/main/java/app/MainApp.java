@@ -36,12 +36,12 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/LoginView.fxml"));
         Parent root = loader.load();
         
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 1080, 720);
         scene.getStylesheets().add(getClass().getResource("/css/theme.css").toExternalForm());
         
         primaryStage.setTitle("Cybersecurity Incident Reporting System");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         primaryStage.show();
     }
     

@@ -29,6 +29,13 @@ public class VictimService {
     public Victim getVictimById(int victimID) {
         return victimDAO.findById(victimID);
     }
+
+    public Victim getVictimByEmail(String email) {
+        if (!ValidationUtils.isValidEmail(email)) {
+            return null;
+        }
+        return victimDAO.findByEmail(email);
+    }
     
     public boolean updateVictimStatus(int victimID, String newStatus, Integer adminID) {
         if (!ValidationUtils.isValidEnumValue(newStatus, new String[]{"Active", "Flagged", "Suspended"})) {
