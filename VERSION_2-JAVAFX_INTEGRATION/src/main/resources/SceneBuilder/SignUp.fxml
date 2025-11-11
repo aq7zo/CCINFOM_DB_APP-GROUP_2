@@ -10,12 +10,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-      prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: #2BC1CF;"
-      xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="main.java.com.group2.dbapp.controller.SignUpController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #2BC1CF;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.com.group2.dbapp.controller.SignUpController">
     <children>
-        <Pane layoutX="161.0" prefHeight="450.0" prefWidth="284.0" style="-fx-background-color: #ff4d4d;">
+        <Pane layoutX="161.0" prefHeight="400.0" prefWidth="284.0" style="-fx-background-color: #ff4d4d;">
             <children>
                 <!-- Logo -->
                 <ImageView fitHeight="140.0" fitWidth="160.0" layoutX="62.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
@@ -25,7 +22,7 @@
                 </ImageView>
 
                 <!-- Title -->
-                <Text layoutX="65.0" layoutY="175.0" text="Create Account" fill="white">
+                <Text fill="white" layoutX="65.0" layoutY="175.0" text="Create Account">
                     <font>
                         <Font name="Century Gothic Bold" size="18.0" />
                     </font>
@@ -37,25 +34,23 @@
                 <PasswordField fx:id="passwordField" layoutX="45.0" layoutY="270.0" prefHeight="35.0" prefWidth="200.0" promptText="Password" />
                 <PasswordField fx:id="confirmPasswordField" layoutX="45.0" layoutY="310.0" prefHeight="35.0" prefWidth="200.0" promptText="Confirm Password" />
 
-                <!-- Sign Up Button -->
-                <Button fx:id="signUpButton" layoutX="45.0" layoutY="360.0" mnemonicParsing="false" onAction="#handleSignUp"
-                        prefHeight="40.0" prefWidth="200.0" text="Sign Up">
+                <!-- Divider -->
+                <Line endX="100.0" layoutX="142.0" layoutY="355.0" startX="-100.0" stroke="WHITE" />
+      
+                      <!-- Sign Up Button -->
+                <Button fx:id="signUpButton" layoutX="76.0" layoutY="362.0" mnemonicParsing="false" onAction="#handleSignUp" prefHeight="22.0" prefWidth="133.0" text="Sign Up">
                     <font>
                         <Font name="Century Gothic Bold" size="16.0" />
                     </font>
                 </Button>
-
-                <!-- Divider -->
-                <Line endX="100.0" layoutX="144.0" layoutY="415.0" startX="-100.0" stroke="WHITE" />
-
-                <!-- Back to Login -->
-                <Button layoutX="95.0" layoutY="425.0" mnemonicParsing="false" onAction="#handleBackToLogin"
-                        prefHeight="23.0" prefWidth="100.0" text="Back to Login">
-                    <font>
-                        <Font name="Century Gothic Bold" size="12.0" />
-                    </font>
-                </Button>
             </children>
         </Pane>
+
+          <!-- Back to Login -->
+          <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleBackToLogin" prefHeight="23.0" prefWidth="100.0" text="Back to Login">
+              <font>
+                  <Font name="Century Gothic Bold" size="12.0" />
+              </font>
+          </Button>
     </children>
 </Pane>

@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS AttackTypes (
 );
 
 -- ==============================
--- TABLE: Administrators (UPDATED WITH PASSWORD FIELD)
+-- TABLE: Administrators
 -- ==============================
 CREATE TABLE IF NOT EXISTS Administrators (
     AdminID INT AUTO_INCREMENT PRIMARY KEY,
@@ -108,11 +108,23 @@ CREATE TABLE IF NOT EXISTS VictimStatusLog (
 );
 
 -- ==============================
--- INSERT SAMPLE ADMINISTRATOR
--- Password: admin123 (hashed using SHA-256)
+-- INSERT ADMINISTRATORS
+-- Password: admin123 (SHA-256 hash)
 -- ==============================
-INSERT INTO Administrators (Name, Role, ContactEmail, PasswordHash) 
-VALUES ('System Administrator', 'System Admin', 'admin@phishnet.com', 
-'240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9')
-ON DUPLICATE KEY UPDATE Name = Name;
+INSERT INTO Administrators (Name, Role, ContactEmail, PasswordHash)
+VALUES
+('System Administrator', 'System Admin', 'admin@phishnet.com',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
 
+('Zach Benedict Hallare', 'Cybersecurity Staff', 'zach_benedict_hallare@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Benette Enzo Campo', 'Cybersecurity Staff', 'benette_campo@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Brent Prose Rebollos', 'Cybersecurity Staff', 'brent_rebollos@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Georgina Karylle Ravelo', 'Cybersecurity Staff', 'georgina_ravelo@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9')
+ON DUPLICATE KEY UPDATE Name = Name;
