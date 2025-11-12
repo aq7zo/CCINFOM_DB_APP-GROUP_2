@@ -1,9 +1,9 @@
-package main.java.com.group2.dbapp.service;
+package com.group2.dbapp.service;
 
-import main.java.com.group2.dbapp.dao.AdministratorDAO;
-import main.java.com.group2.dbapp.dao.AdministratorDAOImpl;
-import main.java.com.group2.dbapp.model.Administrator;
-import main.java.com.group2.dbapp.util.ValidationUtils;
+import com.group2.dbapp.dao.AdministratorDAO;
+import com.group2.dbapp.dao.AdministratorDAOImpl;
+import com.group2.dbapp.model.Administrator;
+import com.group2.dbapp.util.ValidationUtils;
 
 import java.sql.SQLException;
 import java.util.List;

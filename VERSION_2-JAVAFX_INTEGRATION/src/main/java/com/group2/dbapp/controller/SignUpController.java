@@ -1,11 +1,11 @@
-package main.java.com.group2.dbapp.controller;
+package com.group2.dbapp.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import main.java.com.group2.dbapp.service.AuthenticationService;
+import com.group2.dbapp.service.VictimAuthenticationService;
 
 public class SignUpController {
 
@@ -21,7 +21,7 @@ public class SignUpController {
     @FXML
     private PasswordField confirmPasswordField;
 
-    private AuthenticationService authService = new AuthenticationService();
+    private VictimAuthenticationService authService = new VictimAuthenticationService();
 
     @FXML
     private void handleSignUp() {
@@ -40,18 +40,21 @@ public class SignUpController {
             return;
         }
 
-        boolean success = authService.register(name, email, password, "user");
+        boolean success = authService.register(name, email, password);
+
         if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Account created successfully!");
+            showAlert(Alert.AlertType.INFORMATION, "Success",
+                    "Account created successfully! You can now log in and report incidents.");
             closeWindow();
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Registration failed. Email may already exist.");
+            showAlert(Alert.AlertType.ERROR, "Error",
+                    "Registration failed. Email may already be registered.");
         }
     }
 
     @FXML
     private void handleBackToLogin() {
-        closeWindow(); // Just close the SignUp modal and return to Login
+        closeWindow();
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {

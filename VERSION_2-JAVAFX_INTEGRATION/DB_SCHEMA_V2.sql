@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS Victims (
     VictimID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     ContactEmail VARCHAR(100) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
     AccountStatus ENUM('Active', 'Flagged', 'Suspended') DEFAULT 'Active',
     DateCreated DATETIME DEFAULT CURRENT_TIMESTAMP
 );

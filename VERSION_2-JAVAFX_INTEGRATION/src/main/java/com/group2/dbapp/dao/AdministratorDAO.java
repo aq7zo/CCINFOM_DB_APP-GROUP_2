@@ -1,6 +1,6 @@
-package main.java.com.group2.dbapp.dao;
+package com.group2.dbapp.dao;
 
-import main.java.com.group2.dbapp.model.Administrator;
+import com.group2.dbapp.model.Administrator;
 import java.sql.SQLException;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package main.java.com.group2.dbapp.util;
+package com.group2.dbapp.util;
 
 import java.util.regex.Pattern;
 

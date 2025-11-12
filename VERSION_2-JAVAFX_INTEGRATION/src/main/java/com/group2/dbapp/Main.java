@@ -1,11 +1,12 @@
-package main.java.com.group2.dbapp;
+package com.group2.dbapp;
 
+import com.group2.dbapp.util.DatabaseConnection;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import main.java.com.group2.dbapp.util.DatabaseConnection;
 
 import java.io.IOException;
 
@@ -14,60 +15,60 @@ import java.io.IOException;
  * Entry point for the Cybersecurity Incident Reporting System
  */
 public class Main extends Application {
-    
+
     @Override
     public void start(Stage primaryStage) {
         try {
             // Test database connection
             if (!DatabaseConnection.testConnection()) {
-                showErrorAndExit("Database Connection Failed", 
-                    "Could not connect to the database.\n" +
-                    "Please ensure MySQL is running and the database is configured correctly.");
+                showErrorAndExit("Database Connection Failed",
+                        "Could not connect to the database.\n" +
+                                "Please ensure MySQL is running and the database is configured correctly.");
                 return;
             }
-            
+
             System.out.println("Database connection successful!");
-            
-            // Load the Login FXML
+
+            // Load the Victim Login FXML (LogIn.fxml)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/LogIn.fxml"));
             Parent root = loader.load();
-            
+
             // Set up the stage
             primaryStage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
             primaryStage.setScene(new Scene(root, 600, 400));
             primaryStage.setResizable(false);
             primaryStage.show();
-            
-            System.out.println("Application started successfully!");
-            
+
+            System.out.println("Victim login screen loaded successfully!");
+
         } catch (IOException e) {
             e.printStackTrace();
-            showErrorAndExit("Application Error", 
-                "Failed to load the application interface.\n" +
-                "Error: " + e.getMessage());
+            showErrorAndExit("Application Error",
+                    "Failed to load LogIn.fxml.\n" +
+                            "Check file path: /SceneBuilder/LogIn.fxml\n" +
+                            "Error: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void stop() {
-        // Clean up resources when application closes
+        // Clean up database connection
         DatabaseConnection.closeConnection();
-        System.out.println("Application closed. Resources cleaned up.");
+        System.out.println("Application closed. Database connection terminated.");
     }
-    
+
     /**
-     * Show error message and exit application
+     * Show error dialog and exit
      */
     private void showErrorAndExit(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
         System.exit(1);
     }
-    
+
     /**
      * Main method - entry point
      */
@@ -75,4 +76,3 @@ public class Main extends Application {
         launch(args);
     }
 }
-

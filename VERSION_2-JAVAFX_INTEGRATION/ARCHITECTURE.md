@@ -320,7 +320,7 @@ Step 6: Create SceneBuilder/Incident.fxml
 
 #### 2. Add New Service Method
 ```java
-// In AuthenticationService.java
+// In VictimAuthenticationService.java
 public boolean resetPassword(String email) {
     // Implementation
 }

@@ -89,7 +89,7 @@ public static Administrator authenticate(String email) {
 
 #### VERSION_2
 ```java
-// AuthenticationService.java
+// VictimAuthenticationService.java
 public Administrator login(String email, String password) {
     // Validation
     if (!ValidationUtils.isValidEmail(email)) return null;

@@ -1,4 +1,4 @@
-package main.java.com.group2.dbapp.controller;
+package com.group2.dbapp.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -6,23 +6,24 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import main.java.com.group2.dbapp.model.Administrator;
-import main.java.com.group2.dbapp.service.AuthenticationService;
+import com.group2.dbapp.model.Victim;
+import com.group2.dbapp.service.VictimAuthenticationService;
 
 import java.io.IOException;
 
 /**
  * Controller for the Login page
- * Handles user authentication and login functionality
+ * Handles victim authentication and login functionality
  */
 public class LoginController {
 
     @FXML
-    private TextField emailField;  // ✅ Use TextField, not PasswordField
+    private TextField emailField;
 
     @FXML
     private PasswordField passwordField;
@@ -36,12 +37,15 @@ public class LoginController {
     @FXML
     private Button forgotPasswordButton;
 
-    private AuthenticationService authService;
-    private Administrator currentUser;
+    @FXML
+    private Hyperlink adminLoginLink;
+
+    private VictimAuthenticationService authService;
+    private Victim currentVictim;
 
     @FXML
     public void initialize() {
-        authService = new AuthenticationService();
+        authService = new VictimAuthenticationService();
         System.out.println("LoginController initialized");
     }
 
@@ -60,13 +64,15 @@ public class LoginController {
             return;
         }
 
-        Administrator admin = authService.login(email, password);
+        Victim victim = authService.login(email, password);
 
-        if (admin != null) {
-            currentUser = admin;
+        if (victim != null) {
+            currentVictim = victim;
             showAlert(Alert.AlertType.INFORMATION, "Login Successful",
-                    "Welcome, " + admin.getName() + "!\nRole: " + admin.getRole());
-            closeWindow(); // TODO: Navigate to main dashboard instead
+                    "Welcome, " + victim.getName() + "!\nYou can now report incidents.");
+
+            // TODO: Navigate to victim dashboard
+            closeWindow();
         } else {
             showAlert(Alert.AlertType.ERROR, "Login Failed",
                     "Invalid email or password. Please try again.");
@@ -74,25 +80,22 @@ public class LoginController {
         }
     }
 
-    /**
-     * Handle sign up button click
-     */
     @FXML
     private void handleSignUp() {
         openModalWindow("/SceneBuilder/SignUp.fxml", "Create Account");
     }
 
-    /**
-     * Handle forgot password button click
-     */
     @FXML
     private void handleForgotPassword() {
         openModalWindow("/SceneBuilder/ForgotPassword.fxml", "Reset Password");
     }
 
-    /**
-     * Helper: open new modal window (SignUp / ForgotPassword)
-     */
+
+    @FXML
+    private void handleAdminLogin() {
+        openModalWindow("/SceneBuilder/AdminLogin.fxml", "Administrator Login");
+    }
+
     private void openModalWindow(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -124,7 +127,7 @@ public class LoginController {
         stage.close();
     }
 
-    public Administrator getCurrentUser() {
-        return currentUser;
+    public Victim getCurrentVictim() {
+        return currentVictim;
     }
 }
