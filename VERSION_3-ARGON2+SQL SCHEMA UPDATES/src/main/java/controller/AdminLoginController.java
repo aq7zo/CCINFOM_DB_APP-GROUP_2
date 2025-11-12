@@ -13,7 +13,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Controller for the **Administrator** login modal.
+ * Controller for the Administrator login modal.
+ *
+ * Section 5 Integration:
+ * - On successful login, opens AdminDashboard with 4 reports:
+ *   1. Monthly Attack Trends Report (Martin, Kurt Nehemiah Z.)
+ *   2. Top Perpetrators Report (Hallare, Zach Benedict I.)
+ *   3. Victim Activity Report (Campo, Benette Enzo V.)
+ *   4. Incident Evidence Summary Report (Ravelo, Georgina Karylle P.)
  */
 public class AdminLoginController {
 
@@ -46,8 +53,8 @@ public class AdminLoginController {
             if (admin != null) {
                 System.out.println("Login successful for: " + admin.getName());
                 showAlert(Alert.AlertType.INFORMATION, "Login Successful",
-                        "Welcome, " + admin.getName() + "!");
-                loadAdminDashboard(admin);  // Pass admin object
+                        "Welcome, " + admin.getName() + "!\nYou can now access all reports.");
+                loadAdminDashboard(admin);  // Pass admin to dashboard
             } else {
                 System.err.println("Login failed - invalid credentials");
                 showAlert(Alert.AlertType.ERROR, "Login Failed",
@@ -73,7 +80,14 @@ public class AdminLoginController {
         }
     }
 
-    /** Open the Admin Dashboard with current admin data */
+    /**
+     * Open the Admin Dashboard with 4 Reports (Section 5)
+     * Reports:
+     * 1. Monthly Attack Trends Report – Martin, Kurt Nehemiah Z.
+     * 2. Top Perpetrators Report – Hallare, Zach Benedict I.
+     * 3. Victim Activity Report – Campo, Benette Enzo V.
+     * 4. Incident Evidence Summary Report – Ravelo, Georgina Karylle P.
+     */
     private void loadAdminDashboard(Administrator admin) {
         try {
             // CORRECT PATH: /login uis/AdminDashboard.fxml
@@ -86,16 +100,21 @@ public class AdminLoginController {
             dashboardCtrl.setCurrentAdmin(admin);
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
-            stage.setScene(new Scene(root, 1100, 700));
-            stage.setTitle("PhishNet – Admin Dashboard");
+            stage.setScene(new Scene(root, 1200, 750));
+            stage.setTitle("PhishNet – Admin Dashboard (Section 5 Reports)");
             stage.centerOnScreen();
             stage.show();
+
+            System.out.println("Admin Dashboard loaded for: " + admin.getName());
 
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error",
                     "Could not load the admin dashboard.\n\n" +
-                            "Check: FXML file exists at /login uis/AdminDashboard.fxml");
+                            "Check:\n" +
+                            "- FXML file exists at /login uis/AdminDashboard.fxml\n" +
+                            "- Report FXMLs in /login uis/report/\n" +
+                            "- All controllers are in controller.report package");
         }
     }
 

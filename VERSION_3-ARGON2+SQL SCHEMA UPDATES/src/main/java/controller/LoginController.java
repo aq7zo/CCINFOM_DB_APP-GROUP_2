@@ -67,8 +67,7 @@ public class LoginController {
             showAlert(Alert.AlertType.INFORMATION, "Login Successful",
                     "Welcome, " + victim.getName() + "!\nYou can now report incidents.");
 
-            // TODO: Navigate to victim dashboard
-            closeWindow();
+            loadVictimDashboard(victim);  // Load Victim Dashboard
         } else {
             showAlert(Alert.AlertType.ERROR, "Login Failed",
                     "Invalid email or password. Please try again.");
@@ -76,14 +75,36 @@ public class LoginController {
         }
     }
 
+    /** Open the Victim Dashboard with current victim data */
+    private void loadVictimDashboard(Victim victim) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login uis/VictimDashboard.fxml"));
+            Parent root = loader.load();
+
+            // Pass victim to dashboard controller
+            VictimDashboardController dashboardCtrl = loader.getController();
+            dashboardCtrl.setCurrentVictim(victim);
+
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root, 1100, 700));
+            stage.setTitle("PhishNet – Victim Dashboard");
+            stage.centerOnScreen();
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load the victim dashboard.");
+        }
+    }
+
     @FXML
     private void handleSignUp() {
-        navigateToScene("/SceneBuilder/login uis/SignUp.fxml", "Create Account");
+        navigateToScene("/login uis/SignUp.fxml", "Create Account");
     }
 
     @FXML
     private void handleAdminLogin() {
-        navigateToScene("/SceneBuilder/login uis/AdminLogin.fxml", "Administrator Login");
+        navigateToScene("/login uis/AdminLogin.fxml", "Administrator Login");
     }
 
     private void navigateToScene(String fxmlPath, String title) {
@@ -109,14 +130,4 @@ public class LoginController {
         alert.setContentText(content);
         alert.showAndWait();
     }
-
-    private void closeWindow() {
-        Stage stage = (Stage) loginButton.getScene().getWindow();
-        stage.close();
-    }
-
-    public Victim getCurrentVictim() {
-        return currentVictim;
-    }
 }
-
