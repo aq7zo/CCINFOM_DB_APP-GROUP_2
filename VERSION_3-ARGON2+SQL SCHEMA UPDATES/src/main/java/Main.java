@@ -29,7 +29,21 @@ public class Main extends Application {
             System.out.println("Database connection successful!");
 
             // Load the Victim Login FXML (LogIn.fxml)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
+            // Use ClassLoader to get resource (works better with default package)
+            // Note: No leading slash when using ClassLoader
+            java.net.URL fxmlUrl = Main.class.getClassLoader().getResource("SceneBuilder/login uis/LogIn.fxml");
+            if (fxmlUrl == null) {
+                // Try alternative path with leading slash
+                fxmlUrl = Main.class.getClassLoader().getResource("/SceneBuilder/login uis/LogIn.fxml");
+            }
+            if (fxmlUrl == null) {
+                throw new IOException("FXML file not found. Searched for:\n" +
+                        "- SceneBuilder/login uis/LogIn.fxml\n" +
+                        "- /SceneBuilder/login uis/LogIn.fxml\n" +
+                        "Make sure file exists in src/resources/ and run 'mvn clean compile'");
+            }
+            System.out.println("Loading FXML from: " + fxmlUrl);
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
 
             // Set up the stage
@@ -42,10 +56,18 @@ public class Main extends Application {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showErrorAndExit("Application Error",
-                    "Failed to load LogIn.fxml.\n" +
-                            "Check file path: /SceneBuilder/login uis/LogIn.fxml\n" +
-                            "Error: " + e.getMessage());
+            String errorMsg = "Failed to load LogIn.fxml.\n\n";
+            errorMsg += "Expected path: /SceneBuilder/login uis/LogIn.fxml\n";
+            errorMsg += "Check that:\n";
+            errorMsg += "1. File exists in src/resources/SceneBuilder/login uis/\n";
+            errorMsg += "2. Resources are copied to target/classes/\n";
+            errorMsg += "3. Run 'mvn clean compile' to rebuild\n\n";
+            errorMsg += "Error: " + e.getMessage();
+            showErrorAndExit("Application Error", errorMsg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAndExit("Unexpected Error",
+                    "An unexpected error occurred:\n" + e.getMessage());
         }
     }
 

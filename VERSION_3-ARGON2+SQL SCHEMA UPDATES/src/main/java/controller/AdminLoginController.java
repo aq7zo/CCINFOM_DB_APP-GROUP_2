@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Controller for the **Administrator** login modal.
@@ -41,19 +42,35 @@ public class AdminLoginController {
         }
 
         try {
+            System.out.println("Attempting admin login for: " + email);
             Administrator admin = adminAuthService.authenticate(email, password);
             if (admin != null) {
+                System.out.println("Login successful for: " + admin.getName());
                 showAlert(Alert.AlertType.INFORMATION, "Login Successful",
                         "Welcome, " + admin.getName() + "!");
                 loadAdminDashboard();
             } else {
+                System.err.println("Login failed - admin is null");
                 showAlert(Alert.AlertType.ERROR, "Login Failed",
-                        "Invalid admin email or password.");
+                        "Invalid admin email or password.\n\n" +
+                        "Please verify:\n" +
+                        "- Email: admin@phishnet.com\n" +
+                        "- Password: PhishNetAdmin124\n" +
+                        "- Database has been populated with PhishNet-inserts.sql");
             }
+        } catch (SQLException e) {
+            System.err.println("Database error during login: " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Database Error",
+                    "Cannot connect to database.\n\nError: " + e.getMessage() + 
+                    "\n\nPlease check:\n" +
+                    "- MySQL server is running\n" +
+                    "- Database connection settings in DatabaseConnection.java");
         } catch (Exception e) {
+            System.err.println("Unexpected error during login: " + e.getMessage());
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error",
-                    "Login error: " + e.getMessage());
+                    "Login error: " + e.getMessage() + "\n\nCheck console for details.");
         }
     }
 

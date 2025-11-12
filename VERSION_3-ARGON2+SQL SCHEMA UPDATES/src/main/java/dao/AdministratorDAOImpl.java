@@ -12,7 +12,8 @@ public class AdministratorDAOImpl implements AdministratorDAO {
 
     @Override
     public Administrator findByEmail(String email) throws SQLException {
-        String query = "SELECT * FROM Administrators WHERE ContactEmail = ?";
+        // Trim email and use case-insensitive comparison for better compatibility
+        String query = "SELECT * FROM Administrators WHERE LOWER(TRIM(ContactEmail)) = LOWER(TRIM(?))";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 

@@ -58,10 +58,10 @@ public class SecurityUtils {
         
         try {
             // Hash password with Argon2id using configured parameters
-            // Password4j automatically handles salt generation and encoding
+            // Using .with(ARGON2_FUNCTION) embeds our specific parameters in the hash
+            // Verification must use the same method to ensure compatibility
             String encodedHash = Password.hash(password)
-                    .addRandomSalt(SALT_LENGTH)  // Generate random salt
-                    .with(ARGON2_FUNCTION)       // Use configured Argon2 function
+                    .with(ARGON2_FUNCTION)       // Use configured Argon2 function with specific parameters
                     .getResult();
             
             return encodedHash;
@@ -89,6 +89,9 @@ public class SecurityUtils {
             return false;
         }
         
+        // Trim hash to remove any whitespace that might have been introduced from database
+        encodedHash = encodedHash.trim();
+        
         // Validate password length
         if (password.length() > 128) {
             return false;
@@ -103,16 +106,19 @@ public class SecurityUtils {
             }
             
             // Verify password using Argon2
-            // Password4j automatically extracts parameters from encoded hash
-            // When verifying, we can use withArgon2() without parameters
-            // as it will extract them from the encoded hash string
+            // CRITICAL: Must use .with(ARGON2_FUNCTION) because that's how hashes are generated
+            // Test results show: ARGON2_FUNCTION generate + ARGON2_FUNCTION verify = SUCCESS
+            //                   ARGON2_FUNCTION generate + .withArgon2() verify = FAILED
             boolean matches = Password.check(password, encodedHash)
-                    .withArgon2();
+                    .with(ARGON2_FUNCTION);
             
             return matches;
             
         } catch (Exception e) {
             System.err.println("Argon2 verification error: " + e.getMessage());
+            System.err.println("Hash format check - starts with $argon2id$: " + encodedHash.startsWith("$argon2id$"));
+            System.err.println("Hash length: " + encodedHash.length());
+            System.err.println("Hash preview (first 50 chars): " + (encodedHash.length() > 50 ? encodedHash.substring(0, 50) + "..." : encodedHash));
             e.printStackTrace();
             return false;
         }

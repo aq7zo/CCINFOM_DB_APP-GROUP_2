@@ -8,6 +8,52 @@ package util;
  */
 public class SecurityUtilsTest {
     public static void main(String[] args) {
+        // Generate admin hash if requested
+        if (args.length > 0 && args[0].equals("--generate-admin-hash")) {
+            String adminPassword = "PhishNetAdmin124";
+            System.out.println("========================================");
+            System.out.println("Generating password4j-compatible hash");
+            System.out.println("Password: " + adminPassword);
+            System.out.println("========================================");
+            String hash = SecurityUtils.hashPassword(adminPassword);
+            if (hash != null) {
+                // Verify it works
+                boolean verified = SecurityUtils.verifyPassword(adminPassword, hash);
+                System.out.println("\nHash: " + hash);
+                System.out.println("Hash length: " + hash.length());
+                System.out.println("Verification: " + (verified ? "✓ SUCCESS" : "✗ FAILED"));
+                System.out.println("\n========================================");
+                System.out.println("SQL UPDATE COMMAND (for single admin):");
+                System.out.println("========================================");
+                System.out.println("USE CybersecurityDB;");
+                System.out.println();
+                System.out.println("UPDATE Administrators");
+                System.out.println("SET PasswordHash = '" + hash + "'");
+                System.out.println("WHERE ContactEmail = 'admin@phishnet.com';");
+                System.out.println();
+                System.out.println("========================================");
+                System.out.println("SQL UPDATE COMMAND (for ALL admins):");
+                System.out.println("========================================");
+                System.out.println("USE CybersecurityDB;");
+                System.out.println();
+                System.out.println("UPDATE Administrators");
+                System.out.println("SET PasswordHash = '" + hash + "'");
+                System.out.println("WHERE ContactEmail IN (");
+                System.out.println("    'admin@phishnet.com',");
+                System.out.println("    'zach_benedict_hallare@dlsu.edu.ph',");
+                System.out.println("    'benette_campo@dlsu.edu.ph',");
+                System.out.println("    'brent_rebollos@dlsu.edu.ph',");
+                System.out.println("    'georgina_ravelo@dlsu.edu.ph'");
+                System.out.println(");");
+                System.out.println("========================================");
+                return;
+            } else {
+                System.err.println("Failed to generate hash!");
+                System.exit(1);
+                return;
+            }
+        }
+        
         System.out.println("=== Testing Argon2 Implementation ===\n");
         
         // Test password
