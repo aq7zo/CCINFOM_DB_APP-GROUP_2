@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class DatabaseConnection {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/CybersecurityDB";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "Benzo6142006";
+    private static final String DB_PASSWORD = "";
     
     private static Connection connection = null;
     

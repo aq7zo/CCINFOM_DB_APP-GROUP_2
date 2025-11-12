@@ -26,7 +26,6 @@ public class AdminLoginController {
     private final AdminAuthenticationService adminAuthService = new AdminAuthenticationService();
 
     @FXML private void initialize() {
-        // optional: set default focus, etc.
         System.out.println("AdminLoginController initialized");
     }
 
@@ -48,24 +47,24 @@ public class AdminLoginController {
                 System.out.println("Login successful for: " + admin.getName());
                 showAlert(Alert.AlertType.INFORMATION, "Login Successful",
                         "Welcome, " + admin.getName() + "!");
-                loadAdminDashboard();
+                loadAdminDashboard(admin);  // Pass admin object
             } else {
-                System.err.println("Login failed - admin is null");
+                System.err.println("Login failed - invalid credentials");
                 showAlert(Alert.AlertType.ERROR, "Login Failed",
                         "Invalid admin email or password.\n\n" +
-                        "Please verify:\n" +
-                        "- Email: admin@phishnet.com\n" +
-                        "- Password: PhishNetAdmin124\n" +
-                        "- Database has been populated with PhishNet-inserts.sql");
+                                "Please verify:\n" +
+                                "- Email: admin@phishnet.com\n" +
+                                "- Password: PhishNetAdmin124\n" +
+                                "- Database has been populated with PhishNet-inserts.sql");
             }
         } catch (SQLException e) {
             System.err.println("Database error during login: " + e.getMessage());
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error",
-                    "Cannot connect to database.\n\nError: " + e.getMessage() + 
-                    "\n\nPlease check:\n" +
-                    "- MySQL server is running\n" +
-                    "- Database connection settings in DatabaseConnection.java");
+                    "Cannot connect to database.\n\nError: " + e.getMessage() +
+                            "\n\nPlease check:\n" +
+                            "- MySQL server is running\n" +
+                            "- Database connection settings in DatabaseConnection.java");
         } catch (Exception e) {
             System.err.println("Unexpected error during login: " + e.getMessage());
             e.printStackTrace();
@@ -74,22 +73,29 @@ public class AdminLoginController {
         }
     }
 
-    /** Open the Admin Dashboard (replace path when you create the FXML) */
-    private void loadAdminDashboard() {
+    /** Open the Admin Dashboard with current admin data */
+    private void loadAdminDashboard(Administrator admin) {
         try {
-            // <-- UPDATE THIS PATH when you add admin_dashboard.fxml -->
+            // CORRECT PATH: /login uis/AdminDashboard.fxml
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/SceneBuilder/AdminDashboard.fxml"));
+                    getClass().getResource("/login uis/AdminDashboard.fxml"));
             Parent root = loader.load();
 
+            // Pass admin to dashboard controller
+            AdminDashboardController dashboardCtrl = loader.getController();
+            dashboardCtrl.setCurrentAdmin(admin);
+
             Stage stage = (Stage) loginButton1.getScene().getWindow();
-            stage.setScene(new Scene(root, 1000, 650));
+            stage.setScene(new Scene(root, 1100, 700));
             stage.setTitle("PhishNet – Admin Dashboard");
+            stage.centerOnScreen();
             stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error",
-                    "Could not load the admin dashboard.");
+                    "Could not load the admin dashboard.\n\n" +
+                            "Check: FXML file exists at /login uis/AdminDashboard.fxml");
         }
     }
 
@@ -104,7 +110,7 @@ public class AdminLoginController {
     @FXML
     private void handleSignUp() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/SignUp.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login uis/SignUp.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
@@ -122,7 +128,7 @@ public class AdminLoginController {
     @FXML
     private void handleAdminLogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login uis/LogIn.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
@@ -136,4 +142,3 @@ public class AdminLoginController {
         }
     }
 }
-
