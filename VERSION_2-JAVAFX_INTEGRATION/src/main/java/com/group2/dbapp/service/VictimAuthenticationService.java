@@ -145,43 +145,4 @@ public class VictimAuthenticationService {
     public boolean isLoggedIn() {
         return currentVictim != null;
     }
-
-    /**
-     * Send password reset (simulated)
-     * @param email Victim's email
-     * @return true if reset successful
-     */
-    public boolean sendPasswordReset(String email) {
-        if (!ValidationUtils.isValidEmail(email)) {
-            System.err.println("Invalid email format");
-            return false;
-        }
-
-        try {
-            Victim victim = victimDAO.findByEmail(email);
-
-            if (victim == null) {
-                System.err.println("No account found with that email");
-                return false;
-            }
-
-            // Generate temporary password
-            String tempPassword = "Temp" + (int)(Math.random() * 10000);
-            String tempHash = SecurityUtils.hashPassword(tempPassword);
-
-            victim.setPasswordHash(tempHash);
-            boolean updated = victimDAO.update(victim);
-
-            if (updated) {
-                System.out.println("Password reset successful for " + email);
-                System.out.println("Temporary password: " + tempPassword);
-                return true;
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error during password reset: " + e.getMessage());
-        }
-
-        return false;
-    }
 }

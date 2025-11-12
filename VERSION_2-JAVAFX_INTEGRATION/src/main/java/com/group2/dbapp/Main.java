@@ -30,12 +30,12 @@ public class Main extends Application {
             System.out.println("Database connection successful!");
 
             // Load the Victim Login FXML (LogIn.fxml)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/LogIn.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
             Parent root = loader.load();
 
             // Set up the stage
             primaryStage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
-            primaryStage.setScene(new Scene(root, 600, 400));
+            primaryStage.setScene(new Scene(root, 600, 450));
             primaryStage.setResizable(false);
             primaryStage.show();
 
@@ -45,7 +45,7 @@ public class Main extends Application {
             e.printStackTrace();
             showErrorAndExit("Application Error",
                     "Failed to load LogIn.fxml.\n" +
-                            "Check file path: /SceneBuilder/LogIn.fxml\n" +
+                            "Check file path: /SceneBuilder/login uis/LogIn.fxml\n" +
                             "Error: " + e.getMessage());
         }
     }

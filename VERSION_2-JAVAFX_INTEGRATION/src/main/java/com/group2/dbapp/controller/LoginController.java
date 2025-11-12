@@ -9,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import com.group2.dbapp.model.Victim;
 import com.group2.dbapp.service.VictimAuthenticationService;
@@ -33,9 +32,6 @@ public class LoginController {
 
     @FXML
     private Button signUpButton;
-
-    @FXML
-    private Button forgotPasswordButton;
 
     @FXML
     private Hyperlink adminLoginLink;
@@ -82,35 +78,27 @@ public class LoginController {
 
     @FXML
     private void handleSignUp() {
-        openModalWindow("/SceneBuilder/SignUp.fxml", "Create Account");
+        navigateToScene("/SceneBuilder/login uis/SignUp.fxml", "Create Account");
     }
-
-    @FXML
-    private void handleForgotPassword() {
-        openModalWindow("/SceneBuilder/ForgotPassword.fxml", "Reset Password");
-    }
-
 
     @FXML
     private void handleAdminLogin() {
-        openModalWindow("/SceneBuilder/AdminLogin.fxml", "Administrator Login");
+        navigateToScene("/SceneBuilder/login uis/AdminLogin.fxml", "Administrator Login");
     }
 
-    private void openModalWindow(String fxmlPath, String title) {
+    private void navigateToScene(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            Stage modalStage = new Stage();
-            modalStage.setTitle(title);
-            modalStage.setScene(new Scene(root));
-            modalStage.initModality(Modality.APPLICATION_MODAL);
-            modalStage.initOwner(loginButton.getScene().getWindow());
-            modalStage.showAndWait();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root, 600, 450));
+            stage.setTitle(title);
+            stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Unable to open window: " + title);
+            showAlert(Alert.AlertType.ERROR, "Error", "Unable to navigate to: " + title + "\nError: " + e.getMessage());
         }
     }
 

@@ -10,43 +10,44 @@
 ### Database Schema (1)
 4. `DB_SCHEMA_V2.sql` - Enhanced database schema with password support
 
-### Documentation Files (6)
+### Documentation Files (7)
 5. `README.md` - Main project documentation
 6. `QUICKSTART.md` - 5-minute quick start guide
 7. `ARCHITECTURE.md` - Detailed architecture explanation
 8. `COMPARISON_V1_V2.md` - Comparison with VERSION_1
 9. `USAGE_EXAMPLES.md` - Code usage examples
 10. `PROJECT_SUMMARY.md` - Project overview and statistics
-11. `FILE_INDEX.md` - This file
+11. `TROUBLESHOOTING.md` - Common issues and solutions
+12. `FILE_INDEX.md` - This file
 
 ### JavaFX Application Entry Point (1)
-12. `src/main/java/com/group2/dbapp/Main.java` - JavaFX Application main class
+13. `src/main/java/com/group2/dbapp/Main.java` - JavaFX Application main class
 
 ### Presentation Layer - Controllers (1)
-13. `src/main/java/com/group2/dbapp/controller/LoginController.java` - Login page controller
+14. `src/main/java/com/group2/dbapp/controller/LoginController.java` - Login page controller
 
 ### Business Logic Layer - Services (2)
-14. `src/main/java/com/group2/dbapp/service/AuthenticationService.java` - Authentication logic
-15. `src/main/java/com/group2/dbapp/service/AdministratorService.java` - Administrator management
+15. `src/main/java/com/group2/dbapp/service/AuthenticationService.java` - Authentication logic
+16. `src/main/java/com/group2/dbapp/service/AdministratorService.java` - Administrator management
 
 ### Data Access Layer - DAO (2)
-16. `src/main/java/com/group2/dbapp/dao/AdministratorDAO.java` - DAO interface
-17. `src/main/java/com/group2/dbapp/dao/AdministratorDAOImpl.java` - DAO implementation
+17. `src/main/java/com/group2/dbapp/dao/AdministratorDAO.java` - DAO interface
+18. `src/main/java/com/group2/dbapp/dao/AdministratorDAOImpl.java` - DAO implementation
 
 ### Domain Models (1)
-18. `src/main/java/com/group2/dbapp/model/Administrator.java` - Administrator entity
+19. `src/main/java/com/group2/dbapp/model/Administrator.java` - Administrator entity
 
 ### Utilities (4)
-19. `src/main/java/com/group2/dbapp/util/DatabaseConnection.java` - Database connection manager
-20. `src/main/java/com/group2/dbapp/util/SecurityUtils.java` - Password hashing & encryption
-21. `src/main/java/com/group2/dbapp/util/ValidationUtils.java` - Input validation
-22. `src/main/java/com/group2/dbapp/util/DateUtils.java` - Date/time utilities
+20. `src/main/java/com/group2/dbapp/util/DatabaseConnection.java` - Database connection manager
+21. `src/main/java/com/group2/dbapp/util/SecurityUtils.java` - Password hashing & encryption
+22. `src/main/java/com/group2/dbapp/util/ValidationUtils.java` - Input validation
+23. `src/main/java/com/group2/dbapp/util/DateUtils.java` - Date/time utilities
 
 ### UI Views - FXML (1)
-23. `SceneBuilder/LogIn.fxml` - Login page FXML design
+24. `src/main/resources/SceneBuilder/LogIn.fxml` - Login page FXML design
 
 ### Assets (1)
-24. `SceneBuilder/assets/ccinfom phishnet logo.png` - Application logo
+25. `src/main/resources/SceneBuilder/assets/ccinfom phishnet logo.png` - Application logo
 
 ---
 
@@ -57,10 +58,10 @@
 | Java Source | 12 | Main, Controller, Services, DAOs, Model, Utils |
 | FXML | 1 | LogIn.fxml |
 | SQL | 1 | DB_SCHEMA_V2.sql |
-| Documentation | 7 | README, guides, comparisons, examples |
+| Documentation | 8 | README, guides, comparisons, examples, troubleshooting |
 | Configuration | 3 | pom.xml, .gitignore, properties template |
 | Assets | 1 | Logo image |
-| **Total** | **25** | |
+| **Total** | **26** | |
 
 ---
 

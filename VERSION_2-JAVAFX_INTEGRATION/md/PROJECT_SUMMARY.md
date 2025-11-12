@@ -27,12 +27,15 @@ VERSION_2-JAVAFX_INTEGRATION/
 │   ├── 📄 USAGE_EXAMPLES.md                # Code usage examples
 │   └── 📄 PROJECT_SUMMARY.md               # This file
 │
-├── 📁 SceneBuilder/                        # FXML files and UI assets
-│   ├── 📄 LogIn.fxml                       # Login page FXML
-│   └── 📁 assets/
-│       └── 🖼️ ccinfom phishnet logo.png    # Application logo
-│
-└── 📁 src/main/java/com/group2/dbapp/
+└── 📁 src/
+    ├── 📁 main/
+    │   ├── 📁 java/com/group2/dbapp/       # Java source files
+    │   └── 📁 resources/
+    │       ├── 📁 SceneBuilder/            # FXML files and UI assets
+    │       │   ├── 📄 LogIn.fxml           # Login page FXML
+    │       │   └── 📁 assets/
+    │       │       └── 🖼️ ccinfom phishnet logo.png
+    │       └── 📄 application.properties.template
     │
     ├── 📄 Main.java                        # ⚡ JavaFX Application entry point
     │

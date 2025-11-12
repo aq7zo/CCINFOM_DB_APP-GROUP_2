@@ -39,11 +39,15 @@ VERSION_2-JAVAFX_INTEGRATION/
 ├── pom.xml                          # Maven configuration with JavaFX dependencies
 ├── DB_SCHEMA_V2.sql                 # Updated database schema with password support
 ├── README.md                        # This file
-├── SceneBuilder/                    # FXML files and assets
-│   ├── LogIn.fxml                   # Login page design
-│   └── assets/
-│       └── ccinfom phishnet logo.png
-└── src/main/java/com/group2/dbapp/
+└── src/
+    ├── main/
+    │   ├── java/com/group2/dbapp/   # Java source files
+    │   └── resources/
+    │       ├── SceneBuilder/        # FXML files and assets
+    │       │   ├── LogIn.fxml       # Login page design
+    │       │   └── assets/
+    │       │       └── ccinfom phishnet logo.png
+    │       └── application.properties.template
     ├── Main.java                    # JavaFX Application entry point
     ├── controller/                  # JavaFX Controllers (Presentation Layer)
     │   └── LoginController.java     # Login page controller
@@ -191,6 +195,11 @@ VALUES ('Jane Doe', 'Cybersecurity Staff', 'jane@phishnet.com',
 3. **JavaFX Runtime Error**
    - Ensure you're running with Maven: `mvn javafx:run`
    - JavaFX must be on the module path
+
+4. **Location is not set / FXML not found**
+   - Ensure FXML files are in `src/main/resources/` directory
+   - Check the path in FXMLLoader matches the resource location
+   - FXML files must be copied to `target/classes/` during build
 
 ## Contributing
 

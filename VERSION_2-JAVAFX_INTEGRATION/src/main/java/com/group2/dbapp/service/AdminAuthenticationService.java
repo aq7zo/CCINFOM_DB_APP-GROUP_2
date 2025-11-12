@@ -20,24 +20,4 @@ public class AdminAuthenticationService {
 
         return null;
     }
-
-    /**
-     * Sends a temporary password to the admin (for password reset)
-     * @param email Admin email
-     * @return true if email exists, false otherwise
-     */
-    public boolean sendPasswordReset(String email) {
-        try {
-            Administrator admin = adminDAO.findByEmail(email);
-            if (admin != null) {
-                String tempPassword = "adminTemp123"; // In real app: generate random
-                System.out.println("TEMP PASSWORD for admin " + email + ": " + tempPassword);
-                // TODO: In future, send via email
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 }

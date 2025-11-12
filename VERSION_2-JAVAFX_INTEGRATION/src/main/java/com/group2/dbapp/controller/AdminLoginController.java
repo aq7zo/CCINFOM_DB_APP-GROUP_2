@@ -16,9 +16,11 @@ import java.io.IOException;
  */
 public class AdminLoginController {
 
-    @FXML private TextField     emailField;
-    @FXML private PasswordField passwordField;
-    @FXML private Button        loginButton;
+    @FXML private TextField     emailField1;
+    @FXML private PasswordField passwordField1;
+    @FXML private Button        loginButton1;
+    @FXML private Button        signUpButton;
+    @FXML private Hyperlink     adminLoginLink;
 
     private final AdminAuthenticationService adminAuthService = new AdminAuthenticationService();
 
@@ -28,9 +30,9 @@ public class AdminLoginController {
     }
 
     @FXML
-    private void handleAdminLoginButton() {
-        String email    = emailField.getText().trim();
-        String password = passwordField.getText();
+    private void handleLogin() {
+        String email    = emailField1.getText().trim();
+        String password = passwordField1.getText();
 
         if (email.isEmpty() || password.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Missing Fields",
@@ -63,7 +65,7 @@ public class AdminLoginController {
                     getClass().getResource("/SceneBuilder/AdminDashboard.fxml"));
             Parent root = loader.load();
 
-            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Stage stage = (Stage) loginButton1.getScene().getWindow();
             stage.setScene(new Scene(root, 1000, 650));
             stage.setTitle("PhishNet – Admin Dashboard");
             stage.show();
@@ -82,10 +84,38 @@ public class AdminLoginController {
         alert.showAndWait();
     }
 
-    /** Close the modal (used by "Back to User Login" button in FXML) */
     @FXML
-    private void handleBackToUserLogin() {
-        Stage stage = (Stage) loginButton.getScene().getWindow();
-        stage.close();
+    private void handleSignUp() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/SignUp.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) loginButton1.getScene().getWindow();
+            stage.setScene(new Scene(root, 600, 450));
+            stage.setTitle("Create Account");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Unable to navigate to sign up screen.");
+        }
+    }
+
+    /** Navigate back to User Login */
+    @FXML
+    private void handleAdminLogin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) loginButton1.getScene().getWindow();
+            stage.setScene(new Scene(root, 600, 450));
+            stage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Unable to navigate to login screen.");
+        }
     }
 }

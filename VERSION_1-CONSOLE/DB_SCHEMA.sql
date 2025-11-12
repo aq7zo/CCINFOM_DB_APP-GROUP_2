@@ -1,13 +1,14 @@
-CREATE DATABASE CybersecurityDB;
+CREATE DATABASE IF NOT EXISTS CybersecurityDB;
 USE CybersecurityDB;
 
 -- ==============================
 -- TABLE: Victims
 -- ==============================
-CREATE TABLE Victims (
+CREATE TABLE IF NOT EXISTS Victims (
     VictimID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     ContactEmail VARCHAR(100) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
     AccountStatus ENUM('Active', 'Flagged', 'Suspended') DEFAULT 'Active',
     DateCreated DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -15,7 +16,7 @@ CREATE TABLE Victims (
 -- ==============================
 -- TABLE: Perpetrators
 -- ==============================
-CREATE TABLE Perpetrators (
+CREATE TABLE IF NOT EXISTS Perpetrators (
     PerpetratorID INT AUTO_INCREMENT PRIMARY KEY,
     Identifier VARCHAR(255) UNIQUE NOT NULL,
     IdentifierType ENUM('Phone Number', 'Email Address', 'Social Media Account', 'Website URL', 'IP Address') NOT NULL,
@@ -27,7 +28,7 @@ CREATE TABLE Perpetrators (
 -- ==============================
 -- TABLE: AttackTypes
 -- ==============================
-CREATE TABLE AttackTypes (
+CREATE TABLE IF NOT EXISTS AttackTypes (
     AttackTypeID INT AUTO_INCREMENT PRIMARY KEY,
     AttackName VARCHAR(100) NOT NULL,
     Description TEXT,
@@ -37,18 +38,19 @@ CREATE TABLE AttackTypes (
 -- ==============================
 -- TABLE: Administrators
 -- ==============================
-CREATE TABLE Administrators (
+CREATE TABLE IF NOT EXISTS Administrators (
     AdminID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     Role ENUM('System Admin', 'Cybersecurity Staff') NOT NULL,
     ContactEmail VARCHAR(100) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
     DateAssigned DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==============================
--- TRANSACTION TABLE: IncidentReports
+-- TABLE: IncidentReports
 -- ==============================
-CREATE TABLE IncidentReports (
+CREATE TABLE IF NOT EXISTS IncidentReports (
     IncidentID INT AUTO_INCREMENT PRIMARY KEY,
     VictimID INT NOT NULL,
     PerpetratorID INT NOT NULL,
@@ -64,9 +66,9 @@ CREATE TABLE IncidentReports (
 );
 
 -- ==============================
--- TRANSACTION TABLE: EvidenceUpload
+-- TABLE: EvidenceUpload
 -- ==============================
-CREATE TABLE EvidenceUpload (
+CREATE TABLE IF NOT EXISTS EvidenceUpload (
     EvidenceID INT AUTO_INCREMENT PRIMARY KEY,
     IncidentID INT NOT NULL,
     EvidenceType ENUM('Screenshot', 'Email', 'File', 'Chat Log') NOT NULL,
@@ -79,9 +81,9 @@ CREATE TABLE EvidenceUpload (
 );
 
 -- ==============================
--- TRANSACTION TABLE: ThreatLevelLog
+-- TABLE: ThreatLevelLog
 -- ==============================
-CREATE TABLE ThreatLevelLog (
+CREATE TABLE IF NOT EXISTS ThreatLevelLog (
     LogID INT AUTO_INCREMENT PRIMARY KEY,
     PerpetratorID INT NOT NULL,
     OldThreatLevel ENUM('UnderReview', 'Suspected', 'Malicious', 'Cleared'),
@@ -93,9 +95,9 @@ CREATE TABLE ThreatLevelLog (
 );
 
 -- ==============================
--- TRANSACTION TABLE: VictimStatusLog
+-- TABLE: VictimStatusLog
 -- ==============================
-CREATE TABLE VictimStatusLog (
+CREATE TABLE IF NOT EXISTS VictimStatusLog (
     LogID INT AUTO_INCREMENT PRIMARY KEY,
     VictimID INT NOT NULL,
     OldStatus ENUM('Active', 'Flagged', 'Suspended'),
@@ -105,3 +107,25 @@ CREATE TABLE VictimStatusLog (
     FOREIGN KEY (VictimID) REFERENCES Victims(VictimID) ON DELETE CASCADE,
     FOREIGN KEY (AdminID) REFERENCES Administrators(AdminID)
 );
+
+-- ==============================
+-- INSERT ADMINISTRATORS
+-- Password: admin123 (SHA-256 hash)
+-- ==============================
+INSERT INTO Administrators (Name, Role, ContactEmail, PasswordHash)
+VALUES
+('System Administrator', 'System Admin', 'admin@phishnet.com',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Zach Benedict Hallare', 'Cybersecurity Staff', 'zach_benedict_hallare@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Benette Enzo Campo', 'Cybersecurity Staff', 'benette_campo@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Brent Prose Rebollos', 'Cybersecurity Staff', 'brent_rebollos@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+
+('Georgina Karylle Ravelo', 'Cybersecurity Staff', 'georgina_ravelo@dlsu.edu.ph',
+ '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9')
+ON DUPLICATE KEY UPDATE Name = Name;
