@@ -31,10 +31,18 @@ public class ReportIncidentController {
     private final AttackTypeDAO attackDAO = new AttackTypeDAOImpl();
     private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl();
     private final ThreatLevelLogDAO threatLogDAO = new ThreatLevelLogDAOImpl();
+    private boolean initialized = false;
 
     @FXML
     private void initialize() {
+        // Prevent multiple initializations
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+
         // Load identifier types
+        identifierTypeCombo.getItems().clear();
         identifierTypeCombo.setItems(FXCollections.observableArrayList(
                 "Phone Number", "Email Address", "Social Media Account / Username",
                 "Website URL / Domain", "IP Address"
@@ -56,11 +64,23 @@ public class ReportIncidentController {
 
     private void loadAttackTypes() {
         try {
+            // Clear existing items first to prevent duplicates
+            if (attackTypeCombo.getItems() != null) {
+                attackTypeCombo.getItems().clear();
+            }
+            
             List<AttackType> types = attackDAO.findAll();
-            List<String> names = types.stream().map(AttackType::getAttackName).toList();
+            // Use distinct to ensure no duplicates (in case database has duplicates)
+            List<String> names = types.stream()
+                    .map(AttackType::getAttackName)
+                    .distinct()
+                    .toList();
+            
             attackTypeCombo.setItems(FXCollections.observableArrayList(names));
+            System.out.println("Loaded " + names.size() + " attack types into ComboBox");
         } catch (Exception e) {
             showError("Failed to load attack types: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
