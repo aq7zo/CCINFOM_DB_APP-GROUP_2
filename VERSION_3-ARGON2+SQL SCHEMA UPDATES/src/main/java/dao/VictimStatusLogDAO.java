@@ -11,7 +11,7 @@ public interface VictimStatusLogDAO {
     /**
      * Log a victim status change
      */
-    boolean logChange(int victimID, String oldStatus, String newStatus, int adminID) throws SQLException;
+    boolean logChange(int victimID, String oldStatus, String newStatus, Integer adminID) throws SQLException;
 
     /**
      * Get all logs for a victim

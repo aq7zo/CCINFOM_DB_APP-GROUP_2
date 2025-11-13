@@ -1,6 +1,5 @@
 package dao;
 
-import dao.VictimDAO;
 import model.Victim;
 import util.DatabaseConnection;
 import util.DateUtils;
@@ -155,6 +154,20 @@ public class VictimDAOImpl implements VictimDAO {
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
+        }
+    }
+
+    @Override
+    public boolean updateAccountStatus(int victimID, String newStatus) throws SQLException {
+        String sql = "UPDATE Victims SET AccountStatus = ? WHERE VictimID = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, victimID);
+
+            return stmt.executeUpdate() > 0;
         }
     }
 

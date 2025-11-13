@@ -12,7 +12,7 @@ import java.util.List;
 public class VictimStatusLogDAOImpl implements VictimStatusLogDAO {
 
     @Override
-    public boolean logChange(int victimID, String oldStatus, String newStatus, int adminID) throws SQLException {
+    public boolean logChange(int victimID, String oldStatus, String newStatus, Integer adminID) throws SQLException {
         String sql = """
             INSERT INTO VictimStatusLog 
             (VictimID, OldStatus, NewStatus, ChangeDate, AdminID) 
@@ -26,7 +26,11 @@ public class VictimStatusLogDAOImpl implements VictimStatusLogDAO {
             stmt.setString(2, oldStatus);
             stmt.setString(3, newStatus);
             stmt.setString(4, DateUtils.toDatabaseFormat(LocalDateTime.now()));
-            stmt.setInt(5, adminID);
+            if (adminID == null) {
+                stmt.setNull(5, Types.INTEGER);
+            } else {
+                stmt.setInt(5, adminID);
+            }
 
             return stmt.executeUpdate() > 0;
         }
@@ -37,7 +41,7 @@ public class VictimStatusLogDAOImpl implements VictimStatusLogDAO {
         return findByColumn("VictimID", victimID);
     }
 
-    @  Override
+    @Override
     public List<VictimStatusLog> findAll() throws SQLException {
         List<VictimStatusLog> list = new ArrayList<>();
         String sql = "SELECT * FROM VictimStatusLog ORDER BY ChangeDate DESC";

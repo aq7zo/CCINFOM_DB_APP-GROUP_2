@@ -55,5 +55,15 @@ public interface VictimDAO {
      * @throws SQLException if database error occurs
      */
     boolean delete(int victimID) throws SQLException;
+
+    /**
+     * Update only the account status for a victim.
+     *
+     * @param victimID   Victim's ID
+     * @param newStatus  New account status
+     * @return true if update successful
+     * @throws SQLException if database error occurs
+     */
+    boolean updateAccountStatus(int victimID, String newStatus) throws SQLException;
 }
 

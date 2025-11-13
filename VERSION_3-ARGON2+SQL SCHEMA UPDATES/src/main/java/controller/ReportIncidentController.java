@@ -6,12 +6,10 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import util.DateUtils;
-import util.SecurityUtils;
-import util.ValidationUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Transaction 1: Incident Reports
@@ -31,7 +29,11 @@ public class ReportIncidentController {
     private final AttackTypeDAO attackDAO = new AttackTypeDAOImpl();
     private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl();
     private final ThreatLevelLogDAO threatLogDAO = new ThreatLevelLogDAOImpl();
+    private final VictimDAO victimDAO = new VictimDAOImpl();
+    private final VictimStatusLogDAO victimStatusLogDAO = new VictimStatusLogDAOImpl();
     private boolean initialized = false;
+    private Consumer<IncidentReport> incidentCreatedCallback;
+    private static final int FLAG_THRESHOLD_MONTH = 5;
 
     @FXML
     private void initialize() {
@@ -132,6 +134,13 @@ public class ReportIncidentController {
                         "Identifier: " + identifier + "\nNow marked as MALICIOUS (" + victimCount + " victims in 7 days)");
             }
 
+            // 4. Auto-flag victim if threshold exceeded
+            autoFlagVictimIfNeeded(report);
+
+            if (incidentCreatedCallback != null) {
+                incidentCreatedCallback.accept(report);
+            }
+
             showAlert(Alert.AlertType.INFORMATION, "Success",
                     "Incident reported successfully!\nID: " + report.getIncidentID());
             clearForm();
@@ -162,6 +171,30 @@ public class ReportIncidentController {
         descriptionArea.clear();
         attackTypeCombo.setValue(null);
         statusLabel.setText("");
+        validateForm();
+    }
+
+    public void setIncidentCreatedCallback(Consumer<IncidentReport> incidentCreatedCallback) {
+        this.incidentCreatedCallback = incidentCreatedCallback;
+    }
+
+    private void autoFlagVictimIfNeeded(IncidentReport report) {
+        if (currentVictim == null) return;
+        try {
+            int incidentCountThisMonth = incidentDAO.countIncidentsLastMonth(currentVictim.getVictimID());
+            if (incidentCountThisMonth > FLAG_THRESHOLD_MONTH && !"Flagged".equals(currentVictim.getAccountStatus())) {
+                String oldStatus = currentVictim.getAccountStatus();
+                String newStatus = "Flagged";
+                victimDAO.updateAccountStatus(currentVictim.getVictimID(), newStatus);
+                victimStatusLogDAO.logChange(currentVictim.getVictimID(), oldStatus, newStatus, null);
+                currentVictim.setAccountStatus(newStatus);
+                showAlert(Alert.AlertType.WARNING, "Account Flagged",
+                        "Your account has been flagged for additional support.\n" +
+                                "Incidents reported this month: " + incidentCountThisMonth);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to auto-flag victim: " + e.getMessage());
+        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

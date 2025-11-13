@@ -88,10 +88,10 @@ public class ViewMyReportsController {
 
     public void setCurrentVictim(Victim victim) {
         this.currentVictim = victim;
-        loadReports();
+        refreshReports();
     }
 
-    private void loadReports() {
+    public void refreshReports() {
         if (currentVictim == null) return;
 
         try {
