@@ -78,7 +78,7 @@ public class LoginController {
     /** Open the Victim Dashboard with current victim data */
     private void loadVictimDashboard(Victim victim) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/VictimDashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/dashboards/VictimDashboard.fxml"));
             Parent root = loader.load();
 
             // Pass victim to dashboard controller

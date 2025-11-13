@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controller.report.MonthlyAttackTrendsReportController"
+      fx:controller="controller.report.TopPerpetratorsReportController"
       spacing="15" style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
 
-    <Label text="Monthly Attack Trends Report" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    <Label text="Top Perpetrators Report" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
 
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Year:" style="-fx-font-weight: bold;"/>
@@ -26,14 +23,14 @@
 
     <Separator/>
 
-    <BarChart fx:id="chart" prefHeight="500" title="Incidents by Hour of Day and Attack Type">
-        <xAxis>
-            <CategoryAxis fx:id="xAxis" label="Hour (0–23)" />
-        </xAxis>
-        <yAxis>
-            <NumberAxis fx:id="yAxis" label="Number of Incidents" />
-        </yAxis>
-    </BarChart>
+    <TableView fx:id="table" prefHeight="500">
+        <columns>
+            <TableColumn fx:id="idCol" text="Identifier" prefWidth="200"/>
+            <TableColumn fx:id="typeCol" text="Type" prefWidth="130"/>
+            <TableColumn fx:id="nameCol" text="Associated Name" prefWidth="160"/>
+            <TableColumn fx:id="attacksCol" text="Incidents" prefWidth="90"/>
+        </columns>
+    </TableView>
 
     <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;"/>
 </VBox>

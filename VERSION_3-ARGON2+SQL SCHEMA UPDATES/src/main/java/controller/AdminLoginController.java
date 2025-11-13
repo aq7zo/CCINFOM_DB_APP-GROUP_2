@@ -76,7 +76,7 @@ public class AdminLoginController {
     private void loadAdminDashboard(Administrator admin) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/SceneBuilder/login uis/AdminDashboard.fxml"));
+                    getClass().getResource("/SceneBuilder/login uis/dashboards/AdminDashboard.fxml"));
             Parent root = loader.load();
 
             // Get the controller and pass admin data
