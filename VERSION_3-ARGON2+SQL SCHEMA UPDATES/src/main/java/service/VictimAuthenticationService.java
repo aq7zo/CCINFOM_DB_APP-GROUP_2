@@ -70,12 +70,20 @@ public class VictimAuthenticationService {
             boolean created = victimDAO.create(newVictim);
 
             if (created) {
-                System.out.println("Registration successful! You can now log in.");
+                System.out.println("Registration successful! VictimID: " + newVictim.getVictimID() + ", Email: " + email);
                 return true;
+            } else {
+                System.err.println("Registration failed: victimDAO.create() returned false");
             }
 
         } catch (SQLException e) {
             System.err.println("Database error during registration: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        } catch (Exception e) {
+            System.err.println("Unexpected error during registration: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Registration error: " + e.getMessage(), e);
         }
 
         return false;

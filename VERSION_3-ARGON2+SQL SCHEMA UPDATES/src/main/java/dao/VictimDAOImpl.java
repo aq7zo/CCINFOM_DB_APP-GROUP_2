@@ -77,25 +77,53 @@ public class VictimDAOImpl implements VictimDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, victim.getName());
-            stmt.setString(2, victim.getContactEmail());
+            // Validate required fields
+            if (victim.getName() == null || victim.getName().trim().isEmpty()) {
+                throw new SQLException("Name cannot be null or empty");
+            }
+            if (victim.getContactEmail() == null || victim.getContactEmail().trim().isEmpty()) {
+                throw new SQLException("ContactEmail cannot be null or empty");
+            }
+            if (victim.getPasswordHash() == null || victim.getPasswordHash().trim().isEmpty()) {
+                throw new SQLException("PasswordHash cannot be null or empty");
+            }
+            if (victim.getAccountStatus() == null || victim.getAccountStatus().trim().isEmpty()) {
+                victim.setAccountStatus("Active"); // Set default if not provided
+            }
+
+            stmt.setString(1, victim.getName().trim());
+            stmt.setString(2, victim.getContactEmail().trim().toLowerCase());
             stmt.setString(3, victim.getPasswordHash());
             stmt.setString(4, victim.getAccountStatus());
 
+            System.out.println("Executing INSERT: Name=" + victim.getName() + ", Email=" + victim.getContactEmail());
+
             int rowsAffected = stmt.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
 
             if (rowsAffected > 0) {
                 // Get the generated ID
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        victim.setVictimID(generatedKeys.getInt(1));
+                        int generatedID = generatedKeys.getInt(1);
+                        victim.setVictimID(generatedID);
+                        System.out.println("Generated VictimID: " + generatedID);
+                    } else {
+                        System.err.println("Warning: No generated keys returned");
                     }
                 }
                 return true;
+            } else {
+                System.err.println("Warning: INSERT executed but no rows affected");
+                return false;
             }
+        } catch (SQLException e) {
+            System.err.println("SQL Error in VictimDAOImpl.create(): " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
+            e.printStackTrace();
+            throw e; // Re-throw to let caller handle
         }
-
-        return false;
     }
 
     @Override

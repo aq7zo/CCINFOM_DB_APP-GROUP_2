@@ -49,15 +49,36 @@ public class SignUpController {
             return;
         }
 
-        boolean success = authService.register(name, email, password);
+        try {
+            boolean success = authService.register(name, email, password);
 
-        if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Success",
-                    "Account created successfully! You can now log in and report incidents.");
-            navigateToLogin();
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Error",
-                    "Registration failed. Email may already be registered.");
+            if (success) {
+                showAlert(Alert.AlertType.INFORMATION, "Success",
+                        "Account created successfully! You can now log in and report incidents.");
+                // Clear form fields
+                nameField.clear();
+                emailField.clear();
+                passwordField.clear();
+                confirmPasswordField.clear();
+                navigateToLogin();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Registration Failed",
+                        "Registration failed. Possible reasons:\n" +
+                        "- Email may already be registered\n" +
+                        "- Invalid email format\n" +
+                        "- Password must be at least 6 characters\n" +
+                        "- Database connection issue\n\n" +
+                        "Please check the console for details.");
+            }
+        } catch (RuntimeException e) {
+            showAlert(Alert.AlertType.ERROR, "Registration Error",
+                    "An error occurred during registration:\n" + e.getMessage() + 
+                    "\n\nPlease check the console for more details.");
+            e.printStackTrace();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Unexpected Error",
+                    "An unexpected error occurred:\n" + e.getMessage());
+            e.printStackTrace();
         }
     }
 
