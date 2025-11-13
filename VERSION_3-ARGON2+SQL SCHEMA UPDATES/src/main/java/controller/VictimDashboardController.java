@@ -92,18 +92,19 @@ public class VictimDashboardController {
     @FXML
     private void handleLogout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login uis/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) victimNameLabel.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("PhishNet - Login");
+            stage.setScene(new Scene(root, 600, 450));
+            stage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
             stage.centerOnScreen();
             stage.show();
 
             showAlert("Logged out successfully.");
         } catch (IOException e) {
-            showError("Logout failed: " + e.getMessage());
+            e.printStackTrace();
+            showError("Logout failed: " + e.getMessage() + "\n\nPlease check console for details.");
         }
     }
 
