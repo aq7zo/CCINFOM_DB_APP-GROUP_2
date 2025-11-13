@@ -39,6 +39,16 @@ public class ThreatLevelLogDAOImpl implements ThreatLevelLogDAO {
     }
 
     @Override
+    public boolean insert(ThreatLevelLog log) throws SQLException {
+        return logChange(
+                log.getPerpetratorID(),
+                log.getOldThreatLevel(),
+                log.getNewThreatLevel(),
+                log.getAdminID()
+        );
+    }
+
+    @Override
     public List<ThreatLevelLog> findByPerpetratorID(int perpetratorID) throws SQLException {
         return findByColumn("PerpetratorID", perpetratorID);
     }

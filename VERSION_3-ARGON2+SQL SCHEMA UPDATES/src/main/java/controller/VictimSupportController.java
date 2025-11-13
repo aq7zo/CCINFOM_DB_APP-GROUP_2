@@ -4,6 +4,8 @@ import dao.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.beans.property.SimpleStringProperty;
+import model.Administrator;
 import model.Victim;
 import model.VictimStatusLog;
 

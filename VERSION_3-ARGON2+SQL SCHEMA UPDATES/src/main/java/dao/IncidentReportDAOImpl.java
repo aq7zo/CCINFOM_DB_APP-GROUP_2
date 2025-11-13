@@ -106,6 +106,25 @@ public class IncidentReportDAOImpl implements IncidentReportDAO {
     }
 
     @Override
+    public int countUniqueVictimsLast7Days(int perpetratorID) throws SQLException {
+        String sql = """
+        SELECT COUNT(DISTINCT VictimID) 
+        FROM IncidentReports 
+        WHERE PerpetratorID = ? 
+          AND DateReported >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, perpetratorID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    @Override
     public int countIncidentsLastMonth(int victimID) throws SQLException {
         String sql = """
             SELECT COUNT(*) 

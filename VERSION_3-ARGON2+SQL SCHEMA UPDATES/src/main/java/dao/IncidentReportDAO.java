@@ -12,5 +12,6 @@ public interface IncidentReportDAO {
     List<IncidentReport> findPending() throws SQLException;
     boolean updateStatus(int incidentID, String status, Integer adminID) throws SQLException;
     int countVictimsLast7Days(int perpetratorID) throws SQLException;
+    int countUniqueVictimsLast7Days(int perpetratorID) throws SQLException; // ADD THIS
     int countIncidentsLastMonth(int victimID) throws SQLException;
 }

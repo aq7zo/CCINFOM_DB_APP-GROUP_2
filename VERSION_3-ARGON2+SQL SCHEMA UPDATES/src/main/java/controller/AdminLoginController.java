@@ -14,13 +14,6 @@ import java.sql.SQLException;
 
 /**
  * Controller for the Administrator login modal.
- *
- * Section 5 Integration:
- * - On successful login, opens AdminDashboard with 4 reports:
- *   1. Monthly Attack Trends Report (Martin, Kurt Nehemiah Z.)
- *   2. Top Perpetrators Report (Hallare, Zach Benedict I.)
- *   3. Victim Activity Report (Campo, Benette Enzo V.)
- *   4. Incident Evidence Summary Report (Ravelo, Georgina Karylle P.)
  */
 public class AdminLoginController {
 
@@ -53,10 +46,10 @@ public class AdminLoginController {
             if (admin != null) {
                 System.out.println("Login successful for: " + admin.getName());
                 showAlert(Alert.AlertType.INFORMATION, "Login Successful",
-                        "Welcome, " + admin.getName() + "!\nYou can now access all reports.");
-                loadAdminDashboard(admin);  // Pass admin to dashboard
+                        "Welcome, " + admin.getName() + "!");
+                loadAdminDashboard(admin);
             } else {
-                System.err.println("Login failed - invalid credentials");
+                System.err.println("Login failed - admin is null");
                 showAlert(Alert.AlertType.ERROR, "Login Failed",
                         "Invalid admin email or password.\n\n" +
                                 "Please verify:\n" +
@@ -80,41 +73,32 @@ public class AdminLoginController {
         }
     }
 
-    /**
-     * Open the Admin Dashboard with 4 Reports (Section 5)
-     * Reports:
-     * 1. Monthly Attack Trends Report – Martin, Kurt Nehemiah Z.
-     * 2. Top Perpetrators Report – Hallare, Zach Benedict I.
-     * 3. Victim Activity Report – Campo, Benette Enzo V.
-     * 4. Incident Evidence Summary Report – Ravelo, Georgina Karylle P.
-     */
     private void loadAdminDashboard(Administrator admin) {
         try {
-            // CORRECT PATH: /login uis/AdminDashboard.fxml
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/login uis/AdminDashboard.fxml"));
+                    getClass().getResource("/SceneBuilder/login uis/AdminDashboard.fxml"));
             Parent root = loader.load();
 
-            // Pass admin to dashboard controller
-            AdminDashboardController dashboardCtrl = loader.getController();
-            dashboardCtrl.setCurrentAdmin(admin);
+            // Get the controller and pass admin data
+            Object controller = loader.getController();
+            if (controller != null) {
+                try {
+                    controller.getClass()
+                            .getMethod("setCurrentAdmin", Administrator.class)
+                            .invoke(controller, admin);
+                } catch (Exception e) {
+                    System.err.println("Warning: Could not set admin in dashboard: " + e.getMessage());
+                }
+            }
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
             stage.setScene(new Scene(root, 1200, 750));
-            stage.setTitle("PhishNet – Admin Dashboard (Section 5 Reports)");
-            stage.centerOnScreen();
+            stage.setTitle("PhishNet – Admin Dashboard");
             stage.show();
-
-            System.out.println("Admin Dashboard loaded for: " + admin.getName());
-
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error",
-                    "Could not load the admin dashboard.\n\n" +
-                            "Check:\n" +
-                            "- FXML file exists at /login uis/AdminDashboard.fxml\n" +
-                            "- Report FXMLs in /login uis/report/\n" +
-                            "- All controllers are in controller.report package");
+                    "Could not load the admin dashboard.");
         }
     }
 
@@ -129,7 +113,7 @@ public class AdminLoginController {
     @FXML
     private void handleSignUp() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login uis/SignUp.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/SignUp.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
@@ -143,11 +127,10 @@ public class AdminLoginController {
         }
     }
 
-    /** Navigate back to User Login */
     @FXML
     private void handleAdminLogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login uis/LogIn.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();

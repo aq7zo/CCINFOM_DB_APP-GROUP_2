@@ -8,21 +8,23 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
 
-/**
- * Report: Top Perpetrators
- * Ranks by incident count in selected month
- */
 public class TopPerpetratorsReportController {
 
     @FXML private ComboBox<Integer> yearCombo;
     @FXML private ComboBox<Integer> monthCombo;
     @FXML private TableView<TopPerp> table;
-    @FXML private TableColumn<TopPerp, String> idCol, typeCol, nameCol, attacksCol;
+    @FXML private TableColumn<TopPerp, String> idCol;
+    @FXML private TableColumn<TopPerp, String> typeCol;
+    @FXML private TableColumn<TopPerp, String> nameCol;
+    @FXML private TableColumn<TopPerp, Number> attacksCol;
     @FXML private Button generateButton;
     @FXML private Button exportButton;
 
@@ -40,7 +42,7 @@ public class TopPerpetratorsReportController {
         idCol.setCellValueFactory(d -> d.getValue().identifierProperty());
         typeCol.setCellValueFactory(d -> d.getValue().typeProperty());
         nameCol.setCellValueFactory(d -> d.getValue().nameProperty());
-        attacksCol.setCellValueFactory(d -> d.getValue().countProperty().asObject());
+        attacksCol.setCellValueFactory(d -> d.getValue().countProperty());
 
         validate();
     }
@@ -116,18 +118,26 @@ public class TopPerpetratorsReportController {
     }
 
     public static class TopPerp {
-        private final String identifier, type, name;
-        private final int count;
+        private final SimpleStringProperty identifier;
+        private final SimpleStringProperty type;
+        private final SimpleStringProperty name;
+        private final SimpleIntegerProperty count;
+
         public TopPerp(String i, String t, String n, int c) {
-            this.identifier = i; this.type = t; this.name = n; this.count = c;
+            this.identifier = new SimpleStringProperty(i);
+            this.type = new SimpleStringProperty(t);
+            this.name = new SimpleStringProperty(n == null ? "" : n);
+            this.count = new SimpleIntegerProperty(c);
         }
-        public String getIdentifier() { return identifier; }
-        public String getType() { return type; }
-        public String getName() { return name == null ? "" : name; }
-        public int getCount() { return count; }
-        public javafx.beans.property.StringProperty identifierProperty() { return new javafx.beans.property.SimpleStringProperty(identifier); }
-        public javafx.beans.property.StringProperty typeProperty() { return new javafx.beans.property.SimpleStringProperty(type); }
-        public javafx.beans.property.StringProperty nameProperty() { return new javafx.beans.property.SimpleStringProperty(getName()); }
-        public javafx.beans.property.IntegerProperty countProperty() { return new javafx.beans.property.SimpleIntegerProperty(count); }
+
+        public String getIdentifier() { return identifier.get(); }
+        public String getType() { return type.get(); }
+        public String getName() { return name.get(); }
+        public int getCount() { return count.get(); }
+
+        public SimpleStringProperty identifierProperty() { return identifier; }
+        public SimpleStringProperty typeProperty() { return type; }
+        public SimpleStringProperty nameProperty() { return name; }
+        public ObservableValue<Number> countProperty() { return count; }
     }
 }
