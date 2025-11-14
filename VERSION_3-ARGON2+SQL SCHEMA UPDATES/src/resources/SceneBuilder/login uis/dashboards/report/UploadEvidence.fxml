@@ -21,8 +21,11 @@
         <Label text="Evidence Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
         <ComboBox fx:id="evidenceTypeCombo" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="300"/>
 
-        <Label text="File Path:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
-        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <Label text="Incident:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="incidentCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="300"/>
+
+        <Label text="File Path:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <TextField fx:id="filePathField" prefWidth="300" editable="false"/>
             <Button fx:id="browseButton" text="Browse..." onAction="#handleBrowse"/>
         </HBox>
@@ -36,4 +39,3 @@
     <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;"/>
 
 </VBox>
-

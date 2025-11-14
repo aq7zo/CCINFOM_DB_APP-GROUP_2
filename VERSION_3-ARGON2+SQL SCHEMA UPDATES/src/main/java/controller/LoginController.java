@@ -86,7 +86,7 @@ public class LoginController {
             dashboardCtrl.setCurrentVictim(victim);
 
             Stage stage = (Stage) loginButton.getScene().getWindow();
-            stage.setScene(new Scene(root, 1100, 700));
+            stage.setScene(new Scene(root, 1200, 750));
             stage.setTitle("PhishNet – Victim Dashboard");
             stage.centerOnScreen();
             stage.show();

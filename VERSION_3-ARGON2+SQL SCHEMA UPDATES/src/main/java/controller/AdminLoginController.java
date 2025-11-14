@@ -51,11 +51,7 @@ public class AdminLoginController {
             } else {
                 System.err.println("Login failed - admin is null");
                 showAlert(Alert.AlertType.ERROR, "Login Failed",
-                        "Invalid admin email or password.\n\n" +
-                                "Please verify:\n" +
-                                "- Email: admin@phishnet.com\n" +
-                                "- Password: PhishNetAdmin124\n" +
-                                "- Database has been populated with PhishNet-inserts.sql");
+                        "Invalid admin email or password.");
             }
         } catch (SQLException e) {
             System.err.println("Database error during login: " + e.getMessage());
