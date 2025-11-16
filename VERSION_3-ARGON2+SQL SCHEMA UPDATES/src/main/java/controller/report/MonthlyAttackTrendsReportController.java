@@ -72,6 +72,9 @@ public class MonthlyAttackTrendsReportController {
             Map<String, int[]> hourlyData = new HashMap<>();
             List<model.AttackType> types = attackDAO.findAll();
 
+            System.out.println("MonthlyAttackTrendsReportController: Generating report for " + year + "-" + month);
+            System.out.println("MonthlyAttackTrendsReportController: Found " + types.size() + " attack types");
+
             // Initialize
             for (model.AttackType type : types) {
                 hourlyData.put(type.getAttackName(), new int[24]);
@@ -85,6 +88,8 @@ public class MonthlyAttackTrendsReportController {
                 WHERE YEAR(i.DateReported) = ? AND MONTH(i.DateReported) = ?
                 """;
 
+            System.out.println("MonthlyAttackTrendsReportController: Executing SQL: " + sql);
+            int totalRows = 0;
             try (var conn = util.DatabaseConnection.getConnection();
                  var stmt = conn.prepareStatement(sql)) {
 
@@ -93,29 +98,48 @@ public class MonthlyAttackTrendsReportController {
                 var rs = stmt.executeQuery();
 
                 while (rs.next()) {
+                    totalRows++;
                     String attack = rs.getString("AttackName");
                     int hour = rs.getInt("hour");
-                    hourlyData.get(attack)[hour]++;
+                    if (hourlyData.containsKey(attack)) {
+                        hourlyData.get(attack)[hour]++;
+                    }
                 }
+                System.out.println("MonthlyAttackTrendsReportController: Query returned " + totalRows + " rows");
             }
 
             // Build chart
             chart.getData().clear();
+            int seriesCount = 0;
             for (Map.Entry<String, int[]> entry : hourlyData.entrySet()) {
                 XYChart.Series<String, Number> series = new XYChart.Series<>();
                 series.setName(entry.getKey());
+                boolean hasData = false;
                 for (int h = 0; h < 24; h++) {
                     if (entry.getValue()[h] > 0) {
                         series.getData().add(new XYChart.Data<>(String.valueOf(h), entry.getValue()[h]));
+                        hasData = true;
                     }
                 }
-                chart.getData().add(series);
+                if (hasData) {
+                    chart.getData().add(series);
+                    seriesCount++;
+                }
             }
 
-            exportButton.setDisable(false);
-            showAlert("Report generated for " + YearMonth.of(year, month));
+            exportButton.setDisable(seriesCount == 0);
+            
+            if (totalRows == 0) {
+                showAlert("No incidents found for " + YearMonth.of(year, month) + 
+                        ". Try selecting a different year/month or check if data exists in the database.");
+            } else {
+                showAlert("Report generated for " + YearMonth.of(year, month) + 
+                        ". Showing " + seriesCount + " attack type(s) with data.");
+            }
 
         } catch (Exception e) {
+            System.err.println("MonthlyAttackTrendsReportController: Error generating report: " + e.getMessage());
+            e.printStackTrace();
             showError("Generate failed: " + e.getMessage());
         }
     }

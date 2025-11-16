@@ -35,11 +35,13 @@ public class ViewMyReportsController {
     @FXML private TableColumn<IncidentReport, String> perpetratorCol;
     @FXML private TableColumn<IncidentReport, String> statusCol;
     @FXML private TableColumn<IncidentReport, String> descriptionCol;
+    @FXML private TableColumn<IncidentReport, String> reviewedByCol;
 
     private Victim currentVictim;
     private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl();
     private final AttackTypeDAO attackDAO = new AttackTypeDAOImpl();
     private final PerpetratorDAO perpDAO = new PerpetratorDAOImpl();
+    private final dao.AdministratorDAO adminDAO = new dao.AdministratorDAOImpl();
 
     @FXML
     private void initialize() {
@@ -74,16 +76,62 @@ public class ViewMyReportsController {
             }
         });
         
-        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
+        statusCol.setCellValueFactory(cellData -> {
+            String status = cellData.getValue().getStatus();
+            // Make status more visible with styling indication
+            String displayStatus = status != null ? status : "Pending";
+            return new javafx.beans.property.SimpleStringProperty(displayStatus);
+        });
+        
+        // Custom cell factory for status to add colors
+        statusCol.setCellFactory(column -> new javafx.scene.control.TableCell<IncidentReport, String>() {
+            @Override
+            protected void updateItem(String status, boolean empty) {
+                super.updateItem(status, empty);
+                if (empty || status == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(status);
+                    if ("Validated".equals(status)) {
+                        setStyle("-fx-text-fill: #28a745; -fx-font-weight: bold;");
+                    } else if ("Pending".equals(status)) {
+                        setStyle("-fx-text-fill: #ffc107; -fx-font-weight: bold;");
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
+        
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        
+        // Show who reviewed the report
+        reviewedByCol.setCellValueFactory(cellData -> {
+            IncidentReport report = cellData.getValue();
+            Integer adminID = report.getAdminID();
+            if (adminID != null && adminID > 0) {
+                try {
+                    model.Administrator admin = adminDAO.findById(adminID);
+                    if (admin != null) {
+                        return new javafx.beans.property.SimpleStringProperty(admin.getName());
+                    }
+                } catch (Exception e) {
+                    // If can't find admin, show ID
+                    return new javafx.beans.property.SimpleStringProperty("Admin #" + adminID);
+                }
+            }
+            return new javafx.beans.property.SimpleStringProperty("Not reviewed");
+        });
         
         // Set column widths
         idCol.setPrefWidth(80);
         dateCol.setPrefWidth(150);
         attackTypeCol.setPrefWidth(150);
         perpetratorCol.setPrefWidth(200);
-        statusCol.setPrefWidth(100);
-        descriptionCol.setPrefWidth(300);
+        statusCol.setPrefWidth(120);
+        descriptionCol.setPrefWidth(250);
+        reviewedByCol.setPrefWidth(150);
     }
 
     public void setCurrentVictim(Victim victim) {

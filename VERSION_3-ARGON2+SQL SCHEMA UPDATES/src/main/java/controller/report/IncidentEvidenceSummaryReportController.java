@@ -60,6 +60,9 @@ public class IncidentEvidenceSummaryReportController {
                 ORDER BY e.SubmissionDate DESC
                 """;
 
+            System.out.println("IncidentEvidenceSummaryReportController: Generating report for " + year + "-" + month);
+            System.out.println("IncidentEvidenceSummaryReportController: Executing SQL: " + sql);
+
             List<EvidenceSummary> list = new ArrayList<>();
             try (var conn = util.DatabaseConnection.getConnection();
                  var stmt = conn.prepareStatement(sql)) {
@@ -68,21 +71,36 @@ public class IncidentEvidenceSummaryReportController {
                 stmt.setInt(2, month);
                 var rs = stmt.executeQuery();
 
+                int rowCount = 0;
                 while (rs.next()) {
+                    rowCount++;
+                    String submissionDateStr = rs.getString("SubmissionDate");
+                    String dateStr = (submissionDateStr != null && submissionDateStr.length() >= 16) 
+                            ? submissionDateStr.substring(0, 16) 
+                            : submissionDateStr;
                     list.add(new EvidenceSummary(
                             rs.getString("EvidenceType"),
                             rs.getString("VerifiedStatus"),
                             rs.getString("AdminName"),
-                            rs.getString("SubmissionDate").substring(0, 16)
+                            dateStr
                     ));
                 }
+                System.out.println("IncidentEvidenceSummaryReportController: Query returned " + rowCount + " rows");
             }
 
             table.setItems(FXCollections.observableArrayList(list));
             exportButton.setDisable(list.isEmpty());
-            showAlert(list.size() + " evidence records.");
+            
+            if (list.isEmpty()) {
+                showAlert("No evidence records found for " + year + "-" + String.format("%02d", month) + 
+                        ". Try selecting a different year/month or check if data exists in the database.");
+            } else {
+                showAlert(list.size() + " evidence records.");
+            }
 
         } catch (Exception e) {
+            System.err.println("IncidentEvidenceSummaryReportController: Error generating report: " + e.getMessage());
+            e.printStackTrace();
             showError("Failed: " + e.getMessage());
         }
     }

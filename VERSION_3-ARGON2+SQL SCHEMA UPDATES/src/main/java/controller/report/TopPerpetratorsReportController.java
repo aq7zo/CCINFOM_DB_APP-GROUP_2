@@ -66,6 +66,9 @@ public class TopPerpetratorsReportController {
                 ORDER BY cnt DESC LIMIT 10
                 """;
 
+            System.out.println("TopPerpetratorsReportController: Generating report for " + year + "-" + month);
+            System.out.println("TopPerpetratorsReportController: Executing SQL: " + sql);
+
             List<TopPerp> list = new ArrayList<>();
             try (var conn = util.DatabaseConnection.getConnection();
                  var stmt = conn.prepareStatement(sql)) {
@@ -74,7 +77,9 @@ public class TopPerpetratorsReportController {
                 stmt.setInt(2, month);
                 var rs = stmt.executeQuery();
 
+                int rowCount = 0;
                 while (rs.next()) {
+                    rowCount++;
                     list.add(new TopPerp(
                             rs.getString("Identifier"),
                             rs.getString("IdentifierType"),
@@ -82,13 +87,22 @@ public class TopPerpetratorsReportController {
                             rs.getInt("cnt")
                     ));
                 }
+                System.out.println("TopPerpetratorsReportController: Query returned " + rowCount + " rows");
             }
 
             table.setItems(FXCollections.observableArrayList(list));
-            exportButton.setDisable(false);
-            showAlert("Top 10 Perpetrators loaded for " + year + "-" + String.format("%02d", month));
+            exportButton.setDisable(list.isEmpty());
+            
+            if (list.isEmpty()) {
+                showAlert("No perpetrators found for " + year + "-" + String.format("%02d", month) + 
+                        ". Try selecting a different year/month or check if data exists in the database.");
+            } else {
+                showAlert("Top " + list.size() + " Perpetrators loaded for " + year + "-" + String.format("%02d", month));
+            }
 
         } catch (Exception e) {
+            System.err.println("TopPerpetratorsReportController: Error generating report: " + e.getMessage());
+            e.printStackTrace();
             showError("Failed: " + e.getMessage());
         }
     }

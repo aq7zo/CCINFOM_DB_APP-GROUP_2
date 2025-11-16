@@ -65,6 +65,9 @@ public class VictimActivityReportController {
                 ORDER BY cnt DESC
                 """;
 
+            System.out.println("VictimActivityReportController: Generating report for " + year + "-" + month);
+            System.out.println("VictimActivityReportController: Executing SQL: " + sql);
+
             List<VictimActivity> list = new ArrayList<>();
             try (var conn = util.DatabaseConnection.getConnection();
                  var stmt = conn.prepareStatement(sql)) {
@@ -73,20 +76,32 @@ public class VictimActivityReportController {
                 stmt.setInt(2, month);
                 var rs = stmt.executeQuery();
 
+                int rowCount = 0;
                 while (rs.next()) {
+                    rowCount++;
                     list.add(new VictimActivity(
                             rs.getString("Name"),
                             rs.getString("ContactEmail"),
                             rs.getInt("cnt")
                     ));
                 }
+                System.out.println("VictimActivityReportController: Query returned " + rowCount + " rows");
             }
 
             table.setItems(FXCollections.observableArrayList(list));
             exportButton.setDisable(list.isEmpty());
-            showAlert(list.size() + " high-risk victims found.");
+            
+            if (list.isEmpty()) {
+                showAlert("No high-risk victims found for " + year + "-" + String.format("%02d", month) + 
+                        ". (Victims with >3 incidents in the selected month)\n" +
+                        "Try selecting a different year/month or check if data exists in the database.");
+            } else {
+                showAlert(list.size() + " high-risk victims found.");
+            }
 
         } catch (Exception e) {
+            System.err.println("VictimActivityReportController: Error generating report: " + e.getMessage());
+            e.printStackTrace();
             showError("Failed: " + e.getMessage());
         }
     }

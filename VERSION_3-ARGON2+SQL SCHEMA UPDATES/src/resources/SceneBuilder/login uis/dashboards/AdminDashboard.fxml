@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="750.0" prefWidth="1200.0" style="-fx-background-color: #2BC1CF;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AdminDashboardController">
+<BorderPane fx:id="rootPane" prefHeight="750.0" prefWidth="1200.0" style="-fx-background-color: #2BC1CF;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AdminDashboardController">
 
     <!-- TOP BAR -->
     <top>
@@ -47,7 +47,7 @@
 
     <!-- CENTER: 4 TABS -->
     <center>
-        <TabPane style="-fx-background-color: #f8f9fa;" tabClosingPolicy="UNAVAILABLE">
+        <TabPane fx:id="tabPane" style="-fx-background-color: #f8f9fa;" tabClosingPolicy="UNAVAILABLE">
             <tabs>
 
                 <!-- TAB 1: Monthly Attack Trends -->
@@ -68,6 +68,11 @@
                 <!-- TAB 4: Evidence Summary -->
                 <Tab text="Incident Evidence Summary">
                     <fx:include source="report/IncidentEvidenceSummaryReport.fxml" />
+                </Tab>
+
+                <!-- TAB 5: Pending Reports Review -->
+                <Tab text="Pending Reports Review">
+                    <fx:include fx:id="pendingReportsReview" source="report/PendingReportsReview.fxml" />
                 </Tab>
 
             </tabs>
