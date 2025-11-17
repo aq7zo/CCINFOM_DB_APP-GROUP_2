@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controller.report.PendingReportsReviewController"
+      spacing="15" style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
+
+    <Label text="Pending Reports &amp; Evidence Review" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="reportsCountLabel" text="Pending Reports: 0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="evidenceCountLabel" text="Pending Evidence: 0" style="-fx-font-weight: bold; -fx-padding: 0 0 0 20;"/>
+    </HBox>
+
+    <Separator/>
+
+    <TabPane fx:id="reviewTabs" prefHeight="550">
+        <tabs>
+            <!-- Tab 1: Pending Reports -->
+            <Tab fx:id="pendingReportsTab" text="Pending Reports" closable="false">
+                <VBox spacing="10" style="-fx-padding: 10;">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button fx:id="validateReportButton" text="Validate Selected Reports" disable="true"
+                                style="-fx-background-color: #28a745; -fx-text-fill: white;"
+                                onAction="#handleValidateReport"/>
+                        <Button fx:id="rejectReportButton" text="Reject Report" disable="true"
+                                style="-fx-background-color: #dc3545; -fx-text-fill: white;"
+                                onAction="#handleRejectReport"/>
+                    </HBox>
+                    
+                    <TableView fx:id="reportsTable" prefHeight="480">
+                        <columns>
+                            <TableColumn fx:id="reportSelectCol" text="Select" prefWidth="60"/>
+                            <TableColumn fx:id="reportIdCol" text="Report ID" prefWidth="80"/>
+                            <TableColumn fx:id="reportDateCol" text="Date Reported" prefWidth="150"/>
+                            <TableColumn fx:id="reportDescriptionCol" text="Description" prefWidth="350"/>
+                            <TableColumn fx:id="reportStatusCol" text="Status" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+
+            <!-- Tab 2: Pending Evidence -->
+            <Tab fx:id="pendingEvidenceTab" text="Pending Evidence" closable="false">
+                <VBox spacing="10" style="-fx-padding: 10;">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button fx:id="verifyEvidenceButton" text="Verify Evidence" disable="true"
+                                style="-fx-background-color: #28a745; -fx-text-fill: white;"
+                                onAction="#handleVerifyEvidence"/>
+                        <Button fx:id="rejectEvidenceButton" text="Reject Evidence" disable="true"
+                                style="-fx-background-color: #dc3545; -fx-text-fill: white;"
+                                onAction="#handleRejectEvidence"/>
+                    </HBox>
+                    
+                    <TableView fx:id="evidenceTable" prefHeight="480">
+                        <columns>
+                            <TableColumn fx:id="evidenceIdCol" text="Evidence ID" prefWidth="80"/>
+                            <TableColumn fx:id="evidenceIncidentCol" text="Incident ID" prefWidth="100"/>
+                            <TableColumn fx:id="evidenceTypeCol" text="Type" prefWidth="150"/>
+                            <TableColumn fx:id="evidenceDateCol" text="Submitted" prefWidth="150"/>
+                            <TableColumn fx:id="evidenceStatusCol" text="Status" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+        </tabs>
+    </TabPane>
+
+</VBox>
+
