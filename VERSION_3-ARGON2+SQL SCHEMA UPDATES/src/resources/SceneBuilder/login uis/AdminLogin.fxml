@@ -34,7 +34,7 @@
                   <Image url="@../assets/ccinfom%20phishnet%20logo.png" />
                </image>
             </ImageView>
-            <Text fill="WHITE" layoutX="57.0" layoutY="394.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Administrator Login">
+            <Text fill="WHITE" layoutX="59.0" layoutY="376.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Administrator Login">
                <font>
                   <Font name="Century Gothic Bold" size="18.0" />
                </font>
