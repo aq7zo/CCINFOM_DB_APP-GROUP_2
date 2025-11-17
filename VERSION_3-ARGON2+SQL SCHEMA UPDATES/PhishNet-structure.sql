@@ -95,6 +95,43 @@ CREATE TABLE IF NOT EXISTS EvidenceUpload (
 );
 
 -- ==============================
+-- TABLE: RecycleBinReports
+-- Purpose: Archives rejected incident reports for audit/recovery
+-- ==============================
+CREATE TABLE IF NOT EXISTS RecycleBinReports (
+    BinID INT AUTO_INCREMENT PRIMARY KEY,
+    IncidentID INT NOT NULL,
+    VictimID INT,
+    PerpetratorID INT,
+    AttackTypeID INT,
+    DateReported DATETIME,
+    Description TEXT,
+    OriginalStatus VARCHAR(50),
+    AdminAssignedID INT,
+    RejectedByAdminID INT NOT NULL,
+    ArchiveReason VARCHAR(255),
+    ArchivedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==============================
+-- TABLE: RecycleBinEvidence
+-- Purpose: Archives rejected evidence submissions for audit/recovery
+-- ==============================
+CREATE TABLE IF NOT EXISTS RecycleBinEvidence (
+    BinID INT AUTO_INCREMENT PRIMARY KEY,
+    EvidenceID INT NOT NULL,
+    IncidentID INT,
+    EvidenceType VARCHAR(50),
+    FilePath VARCHAR(255),
+    SubmissionDate DATETIME,
+    OriginalStatus VARCHAR(50),
+    AdminAssignedID INT,
+    RejectedByAdminID INT NOT NULL,
+    ArchiveReason VARCHAR(255),
+    ArchivedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==============================
 -- TABLE: ThreatLevelLog
 -- Purpose: Tracks changes to perpetrator threat levels for audit purposes
 -- ==============================

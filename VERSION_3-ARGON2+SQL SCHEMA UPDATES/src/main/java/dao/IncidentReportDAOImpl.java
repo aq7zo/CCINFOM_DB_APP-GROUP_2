@@ -87,6 +87,18 @@ public class IncidentReportDAOImpl implements IncidentReportDAO {
     }
 
     @Override
+    public boolean delete(int incidentID) throws SQLException {
+        String sql = "DELETE FROM IncidentReports WHERE IncidentID = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, incidentID);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    @Override
     public int countVictimsLast7Days(int perpetratorID) throws SQLException {
         String sql = """
             SELECT COUNT(DISTINCT VictimID) 

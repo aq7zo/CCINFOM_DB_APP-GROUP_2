@@ -13,6 +13,8 @@
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label fx:id="reportsCountLabel" text="Pending Reports: 0" style="-fx-font-weight: bold;"/>
         <Label fx:id="evidenceCountLabel" text="Pending Evidence: 0" style="-fx-font-weight: bold; -fx-padding: 0 0 0 20;"/>
+        <Label fx:id="recycleReportsCountLabel" text="Archived Reports: 0" style="-fx-font-weight: bold; -fx-padding: 0 0 0 20;"/>
+        <Label fx:id="recycleEvidenceCountLabel" text="Archived Evidence: 0" style="-fx-font-weight: bold; -fx-padding: 0 0 0 20;"/>
     </HBox>
 
     <Separator/>
@@ -63,6 +65,42 @@
                             <TableColumn fx:id="evidenceTypeCol" text="Type" prefWidth="150"/>
                             <TableColumn fx:id="evidenceDateCol" text="Submitted" prefWidth="150"/>
                             <TableColumn fx:id="evidenceStatusCol" text="Status" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+
+            <!-- Tab 3: Recycle Bin -->
+            <Tab fx:id="recycleBinTab" text="Recycle Bin" closable="false">
+                <VBox spacing="15" style="-fx-padding: 10;">
+                    <Label text="Archived Reports" style="-fx-font-weight: bold;"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button fx:id="restoreReportButton" text="Restore Selected Reports" disable="true"
+                                style="-fx-background-color: #2BC1CF; -fx-text-fill: white;"
+                                onAction="#handleRestoreReports"/>
+                    </HBox>
+                    <TableView fx:id="recycleReportsTable" prefHeight="200">
+                        <columns>
+                            <TableColumn fx:id="recycleReportSelectCol" text="Select" prefWidth="60"/>
+                            <TableColumn fx:id="recycleReportIdCol" text="Report ID" prefWidth="80"/>
+                            <TableColumn fx:id="recycleReportReasonCol" text="Reason" prefWidth="250"/>
+                            <TableColumn fx:id="recycleReportArchivedCol" text="Archived At" prefWidth="150"/>
+                        </columns>
+                    </TableView>
+
+                    <Label text="Archived Evidence" style="-fx-font-weight: bold;"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button fx:id="restoreEvidenceButton" text="Restore Selected Evidence" disable="true"
+                                style="-fx-background-color: #2BC1CF; -fx-text-fill: white;"
+                                onAction="#handleRestoreEvidence"/>
+                    </HBox>
+                    <TableView fx:id="recycleEvidenceTable" prefHeight="200">
+                        <columns>
+                            <TableColumn fx:id="recycleEvidenceSelectCol" text="Select" prefWidth="60"/>
+                            <TableColumn fx:id="recycleEvidenceIdCol" text="Evidence ID" prefWidth="90"/>
+                            <TableColumn fx:id="recycleEvidenceIncidentCol" text="Incident ID" prefWidth="100"/>
+                            <TableColumn fx:id="recycleEvidenceTypeCol" text="Type" prefWidth="150"/>
+                            <TableColumn fx:id="recycleEvidenceArchivedCol" text="Archived At" prefWidth="150"/>
                         </columns>
                     </TableView>
                 </VBox>

@@ -81,8 +81,8 @@ ON DUPLICATE KEY UPDATE Identifier = Identifier;
 
 INSERT INTO Victims (Name, ContactEmail, PasswordHash, AccountStatus)
 VALUES
-('Juan Dela Cruz', 'juan.delacruz@example.com',
- '$argon2id$v=19$m=65536,t=3,p=4$0fesm8msEaOZb7vwiqg0pQ$iadfO42ZgO4dM51XtywP4tiVvfjN+2QnyZvvMfrBAoA', 'Active'),
+('Tester Cularcancer', 'tester@example.com',
+ '$argon2id$v=19$m=65536,t=3,p=4$ZWgiDa9T95Bv2X+maeqSEQ$gmrWCU6zCEjJZ6Scgs+tX26VESOa+0MJ6qxOLntc+ys', 'Active'),
 
 ('Maria Santos', 'maria.santos@example.com',
  '$argon2id$v=19$m=65536,t=3,p=4$0fesm8msEaOZb7vwiqg0pQ$iadfO42ZgO4dM51XtywP4tiVvfjN+2QnyZvvMfrBAoA', 'Active'),
