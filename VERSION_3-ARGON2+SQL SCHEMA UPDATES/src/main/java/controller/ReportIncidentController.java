@@ -110,6 +110,8 @@ public class ReportIncidentController {
         try {
             String identifier = identifierField.getText().trim();
             String type = identifierTypeCombo.getValue();
+            // Map UI identifier type to database ENUM value
+            String dbIdentifierType = mapIdentifierTypeToDB(type);
             String name = associatedNameField.getText().trim();
             String attackName = attackTypeCombo.getValue();
             String desc = descriptionArea.getText().trim();
@@ -119,7 +121,7 @@ public class ReportIncidentController {
             if (perp == null) {
                 perp = new Perpetrator();
                 perp.setIdentifier(identifier);
-                perp.setIdentifierType(type);
+                perp.setIdentifierType(dbIdentifierType);
                 perp.setAssociatedName(name.isEmpty() ? null : name);
                 perp.setThreatLevel("UnderReview");
                 perp.setLastIncidentDate(LocalDateTime.now());
@@ -194,6 +196,28 @@ public class ReportIncidentController {
 
         submitButton.setDisable(!valid);
         return valid;
+    }
+
+    /**
+     * Maps UI identifier type values to database ENUM values
+     */
+    private String mapIdentifierTypeToDB(String uiType) {
+        if (uiType == null) return null;
+        
+        switch (uiType) {
+            case "Phone Number":
+                return "Phone Number";
+            case "Email Address":
+                return "Email Address";
+            case "Social Media Account / Username":
+                return "Social Media Account";
+            case "Website URL / Domain":
+                return "Website URL";
+            case "IP Address":
+                return "IP Address";
+            default:
+                return uiType; // Fallback to original value
+        }
     }
 
     private void updateIdentifierPromptText(String identifierType) {
