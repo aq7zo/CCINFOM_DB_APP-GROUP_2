@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
@@ -56,17 +59,45 @@
                                 style="-fx-background-color: #dc3545; -fx-text-fill: white;"
                                 onAction="#handleRejectEvidence"/>
                     </HBox>
-                    
-                    <TableView fx:id="evidenceTable" prefHeight="480">
-                        <columns>
-                            <TableColumn fx:id="evidenceSelectCol" text="Select" prefWidth="60"/>
-                            <TableColumn fx:id="evidenceIdCol" text="Evidence ID" prefWidth="80"/>
-                            <TableColumn fx:id="evidenceIncidentCol" text="Incident ID" prefWidth="100"/>
-                            <TableColumn fx:id="evidenceTypeCol" text="Type" prefWidth="150"/>
-                            <TableColumn fx:id="evidenceDateCol" text="Submitted" prefWidth="150"/>
-                            <TableColumn fx:id="evidenceStatusCol" text="Status" prefWidth="120"/>
-                        </columns>
-                    </TableView>
+
+                    <SplitPane orientation="HORIZONTAL" dividerPositions="0.58" VBox.vgrow="ALWAYS">
+                        <items>
+                            <VBox spacing="8" style="-fx-background-color: #ffffff; -fx-padding: 12; -fx-border-color: #e5e5e5; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <Label text="Pending Evidence List" style="-fx-font-weight: bold; -fx-font-size: 14;"/>
+                                <TableView fx:id="evidenceTable" prefHeight="480" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="evidenceSelectCol" text="Select" prefWidth="60"/>
+                                        <TableColumn fx:id="evidenceIdCol" text="Evidence ID" prefWidth="80"/>
+                                        <TableColumn fx:id="evidenceIncidentCol" text="Incident ID" prefWidth="100"/>
+                                        <TableColumn fx:id="evidenceTypeCol" text="Type" prefWidth="150"/>
+                                        <TableColumn fx:id="evidenceDateCol" text="Submitted" prefWidth="150"/>
+                                        <TableColumn fx:id="evidenceStatusCol" text="Status" prefWidth="120"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
+
+                            <VBox spacing="10" style="-fx-background-color: #ffffff; -fx-padding: 12; -fx-border-color: #e5e5e5; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <Label text="Evidence Preview" style="-fx-font-weight: bold; -fx-font-size: 14;"/>
+                                <StackPane prefHeight="320" style="-fx-background-color: #f5f6f8; -fx-border-color: #e5e5e5; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                    <ImageView fx:id="evidencePreviewImage" fitWidth="420" fitHeight="300"
+                                               preserveRatio="true" smooth="true"
+                                               visible="false" managed="false"/>
+                                    <Label fx:id="previewPlaceholderLabel" text="Select an evidence item to preview."
+                                           wrapText="true" style="-fx-text-fill: #6c757d;"
+                                           StackPane.alignment="CENTER"/>
+                                </StackPane>
+                                <Label fx:id="previewMetadataLabel" wrapText="true"
+                                       style="-fx-font-size: 12; -fx-text-fill: #333333;"/>
+                                <Label fx:id="previewFilePathLabel" wrapText="true"
+                                       style="-fx-font-size: 12; -fx-text-fill: #555555;"/>
+                                <Hyperlink fx:id="openFileLocationLink" text="Open Full File Location"
+                                           visible="false" managed="false"
+                                           onAction="#handleOpenFileLocation"/>
+                                <Label text="Only image evidence can be previewed here. Other file types rely on the file path link."
+                                       wrapText="true" style="-fx-font-size: 11; -fx-text-fill: #6c757d;"/>
+                            </VBox>
+                        </items>
+                    </SplitPane>
                 </VBox>
             </Tab>
 

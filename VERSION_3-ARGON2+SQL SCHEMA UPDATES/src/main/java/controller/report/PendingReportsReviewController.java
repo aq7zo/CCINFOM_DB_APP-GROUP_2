@@ -13,12 +13,17 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import model.Administrator;
 import model.Evidence;
 import model.IncidentReport;
 import model.RecycleBinEvidence;
 import model.RecycleBinReport;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -63,6 +68,11 @@ public class PendingReportsReviewController {
     @FXML private Label evidenceCountLabel;
     @FXML private Label recycleReportsCountLabel;
     @FXML private Label recycleEvidenceCountLabel;
+    @FXML private ImageView evidencePreviewImage;
+    @FXML private Label previewPlaceholderLabel;
+    @FXML private Label previewMetadataLabel;
+    @FXML private Label previewFilePathLabel;
+    @FXML private Hyperlink openFileLocationLink;
 
     // Recycle Bin - Reports
     @FXML private TableView<RecycleBinReport> recycleReportsTable;
@@ -91,6 +101,8 @@ public class PendingReportsReviewController {
     private final Map<RecycleBinEvidence, Boolean> recycleEvidenceSelections = new HashMap<>();
     private static final String REPORT_REJECTION_REASON = "Rejected from Pending Reports Review";
     private static final String EVIDENCE_REJECTION_REASON = "Rejected from Pending Evidence Review";
+    private static final String[] IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "bmp", "webp"};
+    private Evidence previewedEvidence;
 
     @FXML
     private void initialize() {
@@ -98,6 +110,7 @@ public class PendingReportsReviewController {
         setupReportsTable();
         setupEvidenceTable();
         setupRecycleBinTables();
+        showEvidencePreview(null);
         
         // Setup button handlers (already set in FXML, but can be set here too)
         
@@ -215,8 +228,12 @@ public class PendingReportsReviewController {
     private void updateEvidenceButtonStates() {
         long selectedCount = selectedEvidence.values().stream().filter(Boolean::booleanValue).count();
         boolean hasSelection = selectedCount > 0;
-        verifyEvidenceButton.setDisable(!hasSelection);
-        rejectEvidenceButton.setDisable(!hasSelection);
+        if (verifyEvidenceButton != null) {
+            verifyEvidenceButton.setDisable(!hasSelection);
+        }
+        if (rejectEvidenceButton != null) {
+            rejectEvidenceButton.setDisable(!hasSelection);
+        }
     }
 
     private void updateRecycleReportButtonState() {
@@ -284,6 +301,11 @@ public class PendingReportsReviewController {
         evidenceTypeCol.setPrefWidth(150);
         evidenceDateCol.setPrefWidth(150);
         evidenceStatusCol.setPrefWidth(120);
+
+        if (evidenceTable != null) {
+            evidenceTable.getSelectionModel().selectedItemProperty().addListener(
+                    (obs, oldSelection, newSelection) -> showEvidencePreview(newSelection));
+        }
 
         updateEvidenceButtonStates();
     }
@@ -435,6 +457,13 @@ public class PendingReportsReviewController {
             ObservableList<Evidence> evidence = FXCollections.observableArrayList(pending);
             if (evidenceTable != null) {
                 evidenceTable.setItems(evidence);
+                if (!evidence.isEmpty()) {
+                    evidenceTable.getSelectionModel().selectFirst();
+                } else {
+                    showEvidencePreview(null);
+                }
+            } else {
+                showEvidencePreview(null);
             }
             if (evidenceCountLabel != null) {
                 evidenceCountLabel.setText("Pending Evidence: " + pending.size());
@@ -758,6 +787,40 @@ public class PendingReportsReviewController {
         refreshPendingEvidence();
     }
 
+    @FXML
+    private void handleOpenFileLocation() {
+        if (previewedEvidence == null) {
+            showAlert(Alert.AlertType.INFORMATION, "No Selection", "Select an evidence item to open its file location.");
+            return;
+        }
+
+        String filePath = previewedEvidence.getFilePath();
+        if (filePath == null || filePath.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Missing File", "This evidence record does not have a saved file path.");
+            return;
+        }
+
+        File file = new File(filePath);
+        if (!file.exists()) {
+            showAlert(Alert.AlertType.ERROR, "File Not Found",
+                    "The referenced file could not be found:\n" + file.getAbsolutePath());
+            return;
+        }
+
+        if (!Desktop.isDesktopSupported()) {
+            showAlert(Alert.AlertType.WARNING, "Not Supported",
+                    "Opening files is not supported on this device. Please access the file manually:\n" + file.getAbsolutePath());
+            return;
+        }
+
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Unable to Open File",
+                    "An error occurred while opening the file:\n" + e.getMessage());
+        }
+    }
+
     private List<IncidentReport> getSelectedIncidentReports() {
         return selectedReports.entrySet().stream()
                 .filter(Map.Entry::getValue)
@@ -784,6 +847,157 @@ public class PendingReportsReviewController {
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    private void showEvidencePreview(Evidence evidence) {
+        previewedEvidence = evidence;
+
+        if (previewMetadataLabel == null || previewPlaceholderLabel == null) {
+            return;
+        }
+
+        if (evidence == null) {
+            previewMetadataLabel.setText("Select an evidence item to preview.");
+            if (previewFilePathLabel != null) {
+                previewFilePathLabel.setText("");
+            }
+            setPreviewImageVisible(false);
+            togglePlaceholder(true, "Select an evidence item to preview.");
+            toggleOpenFileLink(false);
+            return;
+        }
+
+        String submitted = evidence.getSubmissionDate() != null
+                ? evidence.getSubmissionDate().format(dateFormatter)
+                : "N/A";
+        String status = safeValue(evidence.getVerifiedStatus());
+        String type = safeValue(evidence.getEvidenceType());
+
+        previewMetadataLabel.setText(String.format(
+                "Evidence #%d | Incident #%d%nType: %s%nStatus: %s%nSubmitted: %s",
+                evidence.getEvidenceID(),
+                evidence.getIncidentID(),
+                type,
+                status,
+                submitted));
+
+        String filePath = evidence.getFilePath();
+        if (filePath == null || filePath.isBlank()) {
+            if (previewFilePathLabel != null) {
+                previewFilePathLabel.setText("File: (no file path provided)");
+            }
+            setPreviewImageVisible(false);
+            togglePlaceholder(true, "No file path is associated with this evidence.");
+            toggleOpenFileLink(false);
+            return;
+        }
+
+        File file = new File(filePath);
+        boolean exists = file.exists();
+        if (previewFilePathLabel != null) {
+            String labelText = exists ? "File: " + file.getAbsolutePath()
+                    : "File: " + file.getAbsolutePath() + " (not found)";
+            previewFilePathLabel.setText(labelText);
+        }
+
+        if (!exists) {
+            setPreviewImageVisible(false);
+            togglePlaceholder(true, "The referenced file could not be found.");
+            toggleOpenFileLink(false);
+            return;
+        }
+
+        boolean isImage = isImageFile(filePath);
+        if (isImage) {
+            try {
+                Image image = new Image(file.toURI().toString());
+                if (!image.isError() && image.getWidth() > 1 && image.getHeight() > 1) {
+                    if (evidencePreviewImage != null) {
+                        evidencePreviewImage.setImage(image);
+                    }
+                    setPreviewImageVisible(true);
+                    togglePlaceholder(false, null);
+                    toggleOpenFileLink(shouldOfferFullView(image));
+                    return;
+                }
+            } catch (Exception ex) {
+                System.err.println("PendingReportsReviewController: Failed to display image preview for evidence "
+                        + evidence.getEvidenceID() + ": " + ex.getMessage());
+            }
+            setPreviewImageVisible(false);
+            togglePlaceholder(true, "Unable to render the image preview. Use the link below to open the original file.");
+            toggleOpenFileLink(true);
+            return;
+        }
+
+        setPreviewImageVisible(false);
+        togglePlaceholder(true, "Preview available for image uploads only. Use the link below to open the file.");
+        toggleOpenFileLink(true);
+    }
+
+    private void setPreviewImageVisible(boolean visible) {
+        if (evidencePreviewImage == null) {
+            return;
+        }
+        evidencePreviewImage.setVisible(visible);
+        evidencePreviewImage.setManaged(visible);
+        if (!visible) {
+            evidencePreviewImage.setImage(null);
+        }
+    }
+
+    private void togglePlaceholder(boolean show, String message) {
+        if (previewPlaceholderLabel == null) {
+            return;
+        }
+        previewPlaceholderLabel.setVisible(show);
+        previewPlaceholderLabel.setManaged(show);
+        if (message != null && !message.isBlank()) {
+            previewPlaceholderLabel.setText(message);
+        } else if (!show && previewPlaceholderLabel.getText().isBlank()) {
+            previewPlaceholderLabel.setText("Select an evidence item to preview.");
+        }
+    }
+
+    private void toggleOpenFileLink(boolean show) {
+        if (openFileLocationLink == null) {
+            return;
+        }
+        openFileLocationLink.setVisible(show);
+        openFileLocationLink.setManaged(show);
+    }
+
+    private boolean isImageFile(String filePath) {
+        if (filePath == null) {
+            return false;
+        }
+        int dotIndex = filePath.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == filePath.length() - 1) {
+            return false;
+        }
+        String extension = filePath.substring(dotIndex + 1).toLowerCase();
+        for (String allowed : IMAGE_EXTENSIONS) {
+            if (allowed.equals(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean shouldOfferFullView(Image image) {
+        if (image == null || evidencePreviewImage == null) {
+            return false;
+        }
+        double fitWidth = evidencePreviewImage.getFitWidth();
+        double fitHeight = evidencePreviewImage.getFitHeight();
+        if (fitWidth <= 0 || fitHeight <= 0) {
+            return false;
+        }
+        return image.getWidth() > fitWidth || image.getHeight() > fitHeight;
+    }
+
+    private String safeValue(String value) {
+        return (value == null || value.isBlank()) ? "N/A" : value;
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
