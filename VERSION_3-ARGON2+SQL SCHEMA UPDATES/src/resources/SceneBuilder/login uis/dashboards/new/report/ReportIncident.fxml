@@ -19,7 +19,7 @@
         </columnConstraints>
 
         <Label text="Identifier:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="identifierField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        <TextField fx:id="identifierField" GridPane.columnIndex="1" GridPane.rowIndex="0" promptText="+63-912-345-6789"/>
 
         <Label text="Identifier Type:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
         <ComboBox fx:id="identifierTypeCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="300"/>

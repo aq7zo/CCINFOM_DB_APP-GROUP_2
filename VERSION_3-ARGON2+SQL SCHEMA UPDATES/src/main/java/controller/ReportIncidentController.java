@@ -51,6 +51,16 @@ public class ReportIncidentController {
                 "Website URL / Domain", "IP Address"
         ));
         identifierTypeCombo.setValue("Phone Number");
+        
+        // Set initial prompt text
+        updateIdentifierPromptText("Phone Number");
+        
+        // Update prompt text when identifier type changes
+        identifierTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                updateIdentifierPromptText(newVal);
+            }
+        });
 
         // Load attack types
         loadAttackTypes();
@@ -186,6 +196,31 @@ public class ReportIncidentController {
         return valid;
     }
 
+    private void updateIdentifierPromptText(String identifierType) {
+        if (identifierField == null) return;
+        
+        switch (identifierType) {
+            case "Phone Number":
+                identifierField.setPromptText("+63-912-345-6789");
+                break;
+            case "Email Address":
+                identifierField.setPromptText("example@email.com");
+                break;
+            case "Social Media Account / Username":
+                identifierField.setPromptText("@someone67");
+                break;
+            case "Website URL / Domain":
+                identifierField.setPromptText("fake.website.com");
+                break;
+            case "IP Address":
+                identifierField.setPromptText("162.42.93.207");
+                break;
+            default:
+                identifierField.setPromptText("");
+                break;
+        }
+    }
+
     private void clearForm() {
         identifierField.clear();
         associatedNameField.clear();
@@ -194,6 +229,10 @@ public class ReportIncidentController {
             attackTypeCombo.getSelectionModel().selectFirst();
         } else {
             attackTypeCombo.setValue(null);
+        }
+        // Restore prompt text after clearing
+        if (identifierTypeCombo.getValue() != null) {
+            updateIdentifierPromptText(identifierTypeCombo.getValue());
         }
         statusLabel.setText("");
         validateForm();
