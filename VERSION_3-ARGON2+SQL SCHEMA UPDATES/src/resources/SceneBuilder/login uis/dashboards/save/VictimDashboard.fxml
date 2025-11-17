@@ -17,7 +17,7 @@
     <top>
         <VBox prefHeight="95.0" prefWidth="1200.0" style="-fx-background-color: #ff4d4d; -fx-padding: 15;">
             <children>
-            <HBox alignment="CENTER_RIGHT" prefHeight="94.0" prefWidth="1180.0" spacing="10" style="-fx-padding: 0;">
+            <HBox alignment="CENTER_RIGHT" prefHeight="94.0" prefWidth="1180.0" spacing="10" style="-fx-padding: 5 20 0 0;">
                <children>
                   <HBox alignment="CENTER_LEFT" prefHeight="89.0" prefWidth="891.0" spacing="15">
                      <children>
@@ -35,7 +35,7 @@
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="89.0" prefWidth="220.0">
                      <children>
-                        <Label fx:id="victimNameLabel" minWidth="100.0" maxWidth="200.0" prefHeight="18.0" text="Victim: Loading..." textFill="WHITE" textOverrun="ELLIPSIS">
+                        <Label fx:id="adminNameLabel" prefHeight="18.0" prefWidth="141.0" text="Victim: Loading..." textFill="WHITE">
                            <font>
                               <Font name="Century Gothic" size="14.0" />
                            </font>

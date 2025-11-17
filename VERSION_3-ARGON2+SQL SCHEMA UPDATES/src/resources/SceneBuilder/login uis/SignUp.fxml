@@ -22,13 +22,6 @@
                </image>
             </ImageView>
 
-                <!-- Title -->
-                <Text fill="white" layoutX="92.0" layoutY="194.0" text="Create Account">
-                    <font>
-                        <Font name="Century Gothic Bold" size="14.0" />
-                    </font>
-                </Text>
-
                 <!-- Input Fields -->
                 <TextField fx:id="nameField" layoutX="46.0" layoutY="205.0" prefHeight="30.0" prefWidth="201.0" promptText="Full Name" />
                 <TextField fx:id="emailField" layoutX="46.0" layoutY="242.0" prefHeight="30.0" prefWidth="201.0" promptText="Email" />

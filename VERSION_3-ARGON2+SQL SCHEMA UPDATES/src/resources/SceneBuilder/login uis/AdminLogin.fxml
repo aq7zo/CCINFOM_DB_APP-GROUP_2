@@ -14,6 +14,11 @@
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: #2BC1CF;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AdminLoginController">
 
     <children>
+      <Hyperlink fx:id="adminLoginLink" layoutX="21.0" layoutY="415.0" onAction="#handleAdminLogin" text="Login as User" textFill="WHITE">
+         <font>
+            <Font name="Century Gothic Bold" size="12.0" />
+         </font>
+      </Hyperlink>
       <Pane layoutX="160.0" prefHeight="450.0" prefWidth="284.0" style="-fx-background-color: #ff4d4d;">
          <children>
             <TextField fx:id="emailField1" layoutX="45.0" layoutY="180.0" prefHeight="40.0" prefWidth="201.0" promptText="Enter Email" />
@@ -24,29 +29,17 @@
                </font>
             </Button>
             <Line endX="100.0" layoutX="144.0" layoutY="340.0" startX="-100.0" stroke="WHITE" />
-            <Button fx:id="signUpButton" layoutX="108.0" layoutY="357.0" onAction="#handleSignUp" prefHeight="29.0" prefWidth="69.0" text="Sign Up">
-               <font>
-                  <Font name="Century Gothic Bold" size="13.0" />
-               </font>
-            </Button>
             <ImageView fitHeight="150.0" fitWidth="160.0" layoutX="71.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../assets/ccinfom%20phishnet%20logo.png" />
                </image>
             </ImageView>
-
-                <!-- Title -->
-                <Text fill="WHITE" layoutX="59.0" layoutY="422.0" text="Administrator Login">
-                    <font>
-                        <Font name="Century Gothic Bold" size="18.0" />
-                    </font>
-                </Text>
+            <Text fill="WHITE" layoutX="57.0" layoutY="394.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Administrator Login">
+               <font>
+                  <Font name="Century Gothic Bold" size="18.0" />
+               </font>
+            </Text>
          </children>
       </Pane>
-      <Hyperlink fx:id="adminLoginLink" layoutX="21.0" layoutY="415.0" onAction="#handleAdminLogin" text="Login as User" textFill="WHITE">
-         <font>
-            <Font name="Century Gothic Bold" size="12.0" />
-         </font>
-      </Hyperlink>
     </children>
 </Pane>

@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,6 +15,8 @@ import java.io.IOException;
  * Entry point for the Cybersecurity Incident Reporting System
  */
 public class Main extends Application {
+
+    private static final String APP_ICON_PATH = "/SceneBuilder/assets/ccinfom phishnet logo no name.png";
 
     @Override
     public void start(Stage primaryStage) {
@@ -48,6 +51,7 @@ public class Main extends Application {
 
             // Set up the stage
             primaryStage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
+            setApplicationIcon(primaryStage);
             primaryStage.setScene(new Scene(root, 600, 450));
             primaryStage.setResizable(false);
             primaryStage.show();
@@ -69,6 +73,20 @@ public class Main extends Application {
             showErrorAndExit("Unexpected Error",
                     "An unexpected error occurred:\n" + e.getMessage());
         }
+    }
+
+    /**
+     * Load and assign the PhishNet logo as the application icon.
+     */
+    private void setApplicationIcon(Stage stage) {
+        java.net.URL iconUrl = Main.class.getResource(APP_ICON_PATH);
+        if (iconUrl == null) {
+            System.err.println("Warning: Application icon not found at " + APP_ICON_PATH);
+            return;
+        }
+
+        Image appIcon = new Image(iconUrl.toExternalForm());
+        stage.getIcons().add(appIcon);
     }
 
     @Override

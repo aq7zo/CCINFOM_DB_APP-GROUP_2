@@ -55,7 +55,12 @@ public class AdminDashboardController {
     public void setCurrentAdmin(Administrator admin) {
         this.currentAdmin = admin;
         if (admin != null) {
-            adminNameLabel.setText("Admin: " + admin.getName());
+            String name = admin.getName();
+            // Truncate name if too long (max 30 characters for the name part)
+            if (name != null && name.length() > 30) {
+                name = name.substring(0, 27) + "...";
+            }
+            adminNameLabel.setText("Admin: " + (name != null ? name : "Unknown"));
             System.out.println("Admin set in dashboard: " + admin.getName());
             
             // Find and set admin in pending reports review controller

@@ -39,7 +39,12 @@ public class VictimDashboardController {
     public void setCurrentVictim(Victim victim) {
         this.currentVictim = victim;
         if (victimNameLabel != null) {
-            victimNameLabel.setText("Victim: " + victim.getName());
+            String name = victim.getName();
+            // Truncate name if too long (max 30 characters for the name part)
+            if (name != null && name.length() > 30) {
+                name = name.substring(0, 27) + "...";
+            }
+            victimNameLabel.setText("Victim: " + (name != null ? name : "Unknown"));
         }
 
         if (reportIncidentTabController != null) {

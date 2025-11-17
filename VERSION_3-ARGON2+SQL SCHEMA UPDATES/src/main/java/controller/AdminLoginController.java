@@ -17,6 +17,8 @@ import java.sql.SQLException;
  */
 public class AdminLoginController {
 
+    private static final String AUTH_WINDOW_TITLE = "PhishNet - Cybersecurity Incident Reporting System";
+
     @FXML private TextField     emailField1;
     @FXML private PasswordField passwordField1;
     @FXML private Button        loginButton1;
@@ -114,7 +116,7 @@ public class AdminLoginController {
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 450));
-            stage.setTitle("Create Account");
+            stage.setTitle(AUTH_WINDOW_TITLE);
             stage.show();
 
         } catch (IOException e) {
@@ -131,7 +133,7 @@ public class AdminLoginController {
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 450));
-            stage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
+            stage.setTitle(AUTH_WINDOW_TITLE);
             stage.show();
 
         } catch (IOException e) {

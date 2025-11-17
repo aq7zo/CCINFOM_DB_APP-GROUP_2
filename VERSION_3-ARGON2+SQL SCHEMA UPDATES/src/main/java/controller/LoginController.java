@@ -21,6 +21,8 @@ import java.io.IOException;
  */
 public class LoginController {
 
+    private static final String AUTH_WINDOW_TITLE = "PhishNet - Cybersecurity Incident Reporting System";
+
     @FXML
     private TextField emailField;
 
@@ -99,27 +101,27 @@ public class LoginController {
 
     @FXML
     private void handleSignUp() {
-        navigateToScene("/SceneBuilder/login uis/SignUp.fxml", "Create Account");
+        navigateToScene("/SceneBuilder/login uis/SignUp.fxml");
     }
 
     @FXML
     private void handleAdminLogin() {
-        navigateToScene("/SceneBuilder/login uis/AdminLogin.fxml", "Administrator Login");
+        navigateToScene("/SceneBuilder/login uis/AdminLogin.fxml");
     }
 
-    private void navigateToScene(String fxmlPath, String title) {
+    private void navigateToScene(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 450));
-            stage.setTitle(title);
+            stage.setTitle(AUTH_WINDOW_TITLE);
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Unable to navigate to: " + title + "\nError: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Unable to navigate to: " + fxmlPath + "\nError: " + e.getMessage());
         }
     }
 
