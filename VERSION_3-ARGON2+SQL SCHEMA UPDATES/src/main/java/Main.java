@@ -1,6 +1,7 @@
 // No package - default package
 import util.DatabaseConnection;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,6 +22,16 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            // Ensure application exits when window is closed
+            Platform.setImplicitExit(true);
+            
+            // Handle window close request
+            primaryStage.setOnCloseRequest(e -> {
+                stop();
+                Platform.exit();
+                System.exit(0);
+            });
+            
             // Test database connection
             if (!DatabaseConnection.testConnection()) {
                 showErrorAndExit("Database Connection Failed",

@@ -20,8 +20,20 @@
                 <!-- Email field (must be TextField, not PasswordField) -->
                 <TextField fx:id="emailField" layoutX="45.0" layoutY="180.0" prefHeight="40.0" prefWidth="201.0" promptText="Enter Email" />
 
-                <!-- Password field -->
-                <PasswordField fx:id="passwordField" layoutX="45.0" layoutY="230.0" prefHeight="40.0" prefWidth="201.0" promptText="Enter Password" />
+                <!-- Password field container with show/hide button -->
+                <Pane layoutX="45.0" layoutY="230.0" prefHeight="40.0" prefWidth="201.0">
+                    <PasswordField fx:id="passwordField" prefHeight="40.0" prefWidth="201.0" promptText="Enter Password" />
+                    <TextField fx:id="passwordVisibleField" layoutX="0.0" layoutY="0.0" prefHeight="40.0" prefWidth="201.0" promptText="Enter Password" visible="false" />
+                    <Button fx:id="togglePasswordButton" layoutX="165.0" layoutY="5.0" mnemonicParsing="false" onAction="#togglePasswordVisibility" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: transparent; -fx-background-radius: 0;" visible="false">
+                        <graphic>
+                            <ImageView fx:id="togglePasswordImageView" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                <image>
+                                    <Image url="@../assets/showpassword.png" />
+                                </image>
+                            </ImageView>
+                        </graphic>
+                    </Button>
+                </Pane>
 
                 <!-- Login button -->
                 <Button fx:id="loginButton" layoutX="45.0" layoutY="280.0" onAction="#handleLogin" prefHeight="40.0" prefWidth="201.0" text="Log In">

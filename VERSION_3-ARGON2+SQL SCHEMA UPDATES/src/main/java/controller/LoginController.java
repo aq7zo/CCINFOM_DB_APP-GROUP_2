@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import model.Victim;
 import service.VictimAuthenticationService;
@@ -28,6 +30,15 @@ public class LoginController {
 
     @FXML
     private PasswordField passwordField;
+    
+    @FXML
+    private TextField passwordVisibleField;
+    
+    @FXML
+    private Button togglePasswordButton;
+    
+    @FXML
+    private ImageView togglePasswordImageView;
 
     @FXML
     private Button loginButton;
@@ -40,17 +51,57 @@ public class LoginController {
 
     private VictimAuthenticationService authService;
     private Victim currentVictim;
+    private boolean passwordVisible = false;
 
     @FXML
     public void initialize() {
         authService = new VictimAuthenticationService();
         System.out.println("LoginController initialized");
+        
+        // Sync password fields
+        passwordField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!passwordVisible) {
+                passwordVisibleField.setText(newVal);
+            }
+            // Show/hide button based on password length
+            togglePasswordButton.setVisible(newVal != null && newVal.length() > 0);
+        });
+        
+        passwordVisibleField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (passwordVisible) {
+                passwordField.setText(newVal);
+            }
+        });
+        
+        // Initially hide the button
+        togglePasswordButton.setVisible(false);
+    }
+    
+    @FXML
+    private void togglePasswordVisibility() {
+        passwordVisible = !passwordVisible;
+        
+        if (passwordVisible) {
+            // Show password
+            passwordVisibleField.setText(passwordField.getText());
+            passwordVisibleField.setVisible(true);
+            passwordField.setVisible(false);
+            // Change to hide icon
+            togglePasswordImageView.setImage(new Image(getClass().getResourceAsStream("/SceneBuilder/assets/hidepassword.png")));
+        } else {
+            // Hide password
+            passwordField.setText(passwordVisibleField.getText());
+            passwordField.setVisible(true);
+            passwordVisibleField.setVisible(false);
+            // Change to show icon
+            togglePasswordImageView.setImage(new Image(getClass().getResourceAsStream("/SceneBuilder/assets/showpassword.png")));
+        }
     }
 
     @FXML
     private void handleLogin() {
         String email = emailField.getText().trim();
-        String password = passwordField.getText();
+        String password = passwordVisible ? passwordVisibleField.getText() : passwordField.getText();
 
         if (email.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Please enter your email address");
@@ -74,6 +125,7 @@ public class LoginController {
             showAlert(Alert.AlertType.ERROR, "Login Failed",
                     "Invalid email or password. Please try again.");
             passwordField.clear();
+            passwordVisibleField.clear();
         }
     }
 
