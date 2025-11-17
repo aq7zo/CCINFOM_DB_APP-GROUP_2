@@ -1,6 +1,7 @@
 package controller.report;
 
 import dao.*;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,7 +13,9 @@ import model.IncidentReport;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Pending Reports Review Controller
@@ -35,10 +38,11 @@ public class PendingReportsReviewController {
     @FXML private Button rejectReportButton;
     
     // Track selected reports
-    private final java.util.Map<IncidentReport, Boolean> selectedReports = new java.util.HashMap<>();
+    private final Map<IncidentReport, Boolean> selectedReports = new HashMap<>();
     
     // Pending Evidence Table
     @FXML private TableView<Evidence> evidenceTable;
+    @FXML private TableColumn<Evidence, Boolean> evidenceSelectCol;
     @FXML private TableColumn<Evidence, Integer> evidenceIdCol;
     @FXML private TableColumn<Evidence, Integer> evidenceIncidentCol;
     @FXML private TableColumn<Evidence, String> evidenceTypeCol;
@@ -53,6 +57,7 @@ public class PendingReportsReviewController {
     private final EvidenceDAO evidenceDAO = new EvidenceDAOImpl();
     private Administrator currentAdmin;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private final Map<Evidence, Boolean> selectedEvidence = new HashMap<>();
 
     @FXML
     private void initialize() {
@@ -104,7 +109,7 @@ public class PendingReportsReviewController {
         reportSelectCol.setCellValueFactory(cellData -> {
             IncidentReport report = cellData.getValue();
             Boolean selected = selectedReports.getOrDefault(report, false);
-            return new javafx.beans.property.SimpleBooleanProperty(selected);
+            return new SimpleBooleanProperty(selected);
         });
         
         reportSelectCol.setCellFactory(column -> new javafx.scene.control.TableCell<IncidentReport, Boolean>() {
@@ -161,7 +166,48 @@ public class PendingReportsReviewController {
         rejectReportButton.setDisable(!hasSelection);
     }
 
+    private void updateEvidenceButtonStates() {
+        long selectedCount = selectedEvidence.values().stream().filter(Boolean::booleanValue).count();
+        boolean hasSelection = selectedCount > 0;
+        verifyEvidenceButton.setDisable(!hasSelection);
+        rejectEvidenceButton.setDisable(!hasSelection);
+    }
+
     private void setupEvidenceTable() {
+        evidenceSelectCol.setCellValueFactory(cellData -> {
+            Evidence evidence = cellData.getValue();
+            Boolean selected = selectedEvidence.getOrDefault(evidence, false);
+            return new SimpleBooleanProperty(selected);
+        });
+
+        evidenceSelectCol.setCellFactory(column -> new TableCell<>() {
+            private final CheckBox checkBox = new CheckBox();
+            private Evidence currentEvidence;
+
+            {
+                checkBox.setOnAction(e -> {
+                    if (currentEvidence != null) {
+                        selectedEvidence.put(currentEvidence, checkBox.isSelected());
+                        updateEvidenceButtonStates();
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Boolean selected, boolean empty) {
+                super.updateItem(selected, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                    currentEvidence = null;
+                } else {
+                    currentEvidence = getTableRow().getItem();
+                    boolean isSelected = selectedEvidence.getOrDefault(currentEvidence, false);
+                    checkBox.setSelected(isSelected);
+                    setGraphic(checkBox);
+                }
+            }
+        });
+
         evidenceIdCol.setCellValueFactory(new PropertyValueFactory<>("evidenceID"));
         evidenceIncidentCol.setCellValueFactory(new PropertyValueFactory<>("incidentID"));
         evidenceTypeCol.setCellValueFactory(new PropertyValueFactory<>("evidenceType"));
@@ -172,18 +218,14 @@ public class PendingReportsReviewController {
         });
         evidenceStatusCol.setCellValueFactory(new PropertyValueFactory<>("verifiedStatus"));
         
+        evidenceSelectCol.setPrefWidth(60);
         evidenceIdCol.setPrefWidth(80);
         evidenceIncidentCol.setPrefWidth(100);
         evidenceTypeCol.setPrefWidth(150);
         evidenceDateCol.setPrefWidth(150);
         evidenceStatusCol.setPrefWidth(120);
-        
-        // Enable/disable buttons based on selection
-        evidenceTable.getSelectionModel().selectedItemProperty().addListener((obs, old, newVal) -> {
-            boolean hasSelection = newVal != null;
-            verifyEvidenceButton.setDisable(!hasSelection);
-            rejectEvidenceButton.setDisable(!hasSelection);
-        });
+
+        updateEvidenceButtonStates();
     }
 
     public void setCurrentAdmin(Administrator admin) {
@@ -229,6 +271,9 @@ public class PendingReportsReviewController {
             System.out.println("PendingReportsReviewController: Loading pending evidence...");
             List<Evidence> pending = evidenceDAO.findPending();
             System.out.println("PendingReportsReviewController: Found " + pending.size() + " pending evidence");
+
+            selectedEvidence.clear();
+
             ObservableList<Evidence> evidence = FXCollections.observableArrayList(pending);
             if (evidenceTable != null) {
                 evidenceTable.setItems(evidence);
@@ -236,6 +281,7 @@ public class PendingReportsReviewController {
             if (evidenceCountLabel != null) {
                 evidenceCountLabel.setText("Pending Evidence: " + pending.size());
             }
+            updateEvidenceButtonStates();
             System.out.println("PendingReportsReviewController: Evidence loaded successfully");
         } catch (Exception e) {
             System.err.println("PendingReportsReviewController: Failed to load pending evidence: " + e.getMessage());
@@ -252,10 +298,7 @@ public class PendingReportsReviewController {
         }
 
         // Get all selected reports
-        List<IncidentReport> toValidate = selectedReports.entrySet().stream()
-                .filter(java.util.Map.Entry::getValue)
-                .map(java.util.Map.Entry::getKey)
-                .toList();
+        List<IncidentReport> toValidate = getSelectedIncidentReports();
 
         if (toValidate.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "No Selection", "Please select at least one report to validate.");
@@ -295,9 +338,14 @@ public class PendingReportsReviewController {
 
     @FXML
     private void handleRejectReport() {
-        IncidentReport selected = reportsTable.getSelectionModel().getSelectedItem();
-        if (selected == null || currentAdmin == null) {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a report to reject.");
+        if (currentAdmin == null) {
+            showAlert(Alert.AlertType.WARNING, "No Admin", "Admin not set. Please log out and log back in.");
+            return;
+        }
+
+        List<IncidentReport> selected = getSelectedIncidentReports();
+        if (selected.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select at least one report to reject.");
             return;
         }
 
@@ -306,25 +354,48 @@ public class PendingReportsReviewController {
         // Or we could delete it. For now, we'll just show an alert.
         showAlert(Alert.AlertType.INFORMATION, "Rejection", 
                 "Report rejection feature - status remains 'Pending'.\n" +
+                "Selected report(s): " + selected.size() + "\n" +
                 "To fully reject, consider updating the database schema.");
     }
 
     @FXML
     private void handleVerifyEvidence() {
-        Evidence selected = evidenceTable.getSelectionModel().getSelectedItem();
-        if (selected == null || currentAdmin == null) {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select evidence to verify.");
+        if (currentAdmin == null) {
+            showAlert(Alert.AlertType.WARNING, "No Admin", "Admin not set. Please log out and log back in.");
+            return;
+        }
+
+        List<Evidence> toVerify = getSelectedEvidenceItems();
+        if (toVerify.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select at least one piece of evidence to verify.");
             return;
         }
 
         try {
-            if (evidenceDAO.verify(selected.getEvidenceID(), "Verified", currentAdmin.getAdminID())) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", 
-                        "Evidence #" + selected.getEvidenceID() + " has been verified.");
-                refreshPendingEvidence();
-            } else {
-                showError("Failed to verify evidence.");
+            int successCount = 0;
+            int failCount = 0;
+
+            for (Evidence evidence : toVerify) {
+                try {
+                    if (evidenceDAO.verify(evidence.getEvidenceID(), "Verified", currentAdmin.getAdminID())) {
+                        successCount++;
+                        selectedEvidence.remove(evidence);
+                    } else {
+                        failCount++;
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Error verifying evidence #" + evidence.getEvidenceID() + ": " + ex.getMessage());
+                    failCount++;
+                }
             }
+
+            String message = String.format("Verified %d evidence item(s).", successCount);
+            if (failCount > 0) {
+                message += String.format(" %d item(s) failed to verify.", failCount);
+            }
+
+            showAlert(Alert.AlertType.INFORMATION, "Verification Complete", message);
+            refreshPendingEvidence();
         } catch (Exception e) {
             showError("Error verifying evidence: " + e.getMessage());
             e.printStackTrace();
@@ -333,24 +404,60 @@ public class PendingReportsReviewController {
 
     @FXML
     private void handleRejectEvidence() {
-        Evidence selected = evidenceTable.getSelectionModel().getSelectedItem();
-        if (selected == null || currentAdmin == null) {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select evidence to reject.");
+        if (currentAdmin == null) {
+            showAlert(Alert.AlertType.WARNING, "No Admin", "Admin not set. Please log out and log back in.");
+            return;
+        }
+
+        List<Evidence> toReject = getSelectedEvidenceItems();
+        if (toReject.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select at least one piece of evidence to reject.");
             return;
         }
 
         try {
-            if (evidenceDAO.verify(selected.getEvidenceID(), "Rejected", currentAdmin.getAdminID())) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", 
-                        "Evidence #" + selected.getEvidenceID() + " has been rejected.");
-                refreshPendingEvidence();
-            } else {
-                showError("Failed to reject evidence.");
+            int successCount = 0;
+            int failCount = 0;
+
+            for (Evidence evidence : toReject) {
+                try {
+                    if (evidenceDAO.verify(evidence.getEvidenceID(), "Rejected", currentAdmin.getAdminID())) {
+                        successCount++;
+                        selectedEvidence.remove(evidence);
+                    } else {
+                        failCount++;
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Error rejecting evidence #" + evidence.getEvidenceID() + ": " + ex.getMessage());
+                    failCount++;
+                }
             }
+
+            String message = String.format("Rejected %d evidence item(s).", successCount);
+            if (failCount > 0) {
+                message += String.format(" %d item(s) failed to reject.", failCount);
+            }
+
+            showAlert(Alert.AlertType.INFORMATION, "Rejection Complete", message);
+            refreshPendingEvidence();
         } catch (Exception e) {
             showError("Error rejecting evidence: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private List<IncidentReport> getSelectedIncidentReports() {
+        return selectedReports.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    private List<Evidence> getSelectedEvidenceItems() {
+        return selectedEvidence.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

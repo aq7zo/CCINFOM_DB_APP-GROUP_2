@@ -8,9 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.Administrator;
 
@@ -24,10 +22,9 @@ public class AdminDashboardController {
 
     @FXML private Label adminNameLabel;
     @FXML private TabPane tabPane;
-    @FXML private BorderPane rootPane;
+    @FXML private PendingReportsReviewController pendingReportsReviewController;
 
     private Administrator currentAdmin;
-    private PendingReportsReviewController pendingReportsReviewController;
 
     @FXML
     private void initialize() {
@@ -39,17 +36,7 @@ public class AdminDashboardController {
                 if (newTab != null && "Pending Reports Review".equals(newTab.getText())) {
                     // Refresh when this tab is selected
                     Platform.runLater(() -> {
-                        // Find the controller if not already found
-                        if (pendingReportsReviewController == null) {
-                            findAndSetPendingReportsReviewController();
-                        }
-                        // Always refresh data when tab is selected
-                        if (pendingReportsReviewController != null) {
-                            pendingReportsReviewController.refreshPendingReports();
-                            pendingReportsReviewController.refreshPendingEvidence();
-                        } else {
-                            System.err.println("AdminDashboardController: Cannot refresh - controller not found");
-                        }
+                        refreshPendingReviewData();
                     });
                 }
             });
@@ -57,9 +44,7 @@ public class AdminDashboardController {
         
         // Try to find the controller after scene is ready
         Platform.runLater(() -> {
-            if (currentAdmin != null) {
-                findAndSetPendingReportsReviewController();
-            }
+            pushAdminToPendingController();
         });
     }
 
@@ -75,87 +60,25 @@ public class AdminDashboardController {
             
             // Find and set admin in pending reports review controller
             // Use Platform.runLater to ensure scene is fully initialized
-            Platform.runLater(() -> {
-                findAndSetPendingReportsReviewController();
-            });
+            Platform.runLater(this::pushAdminToPendingController);
         }
     }
-    
-    /**
-     * Find the PendingReportsReviewController from the scene and set admin
-     */
-    private void findAndSetPendingReportsReviewController() {
-        if (currentAdmin == null) {
-            System.out.println("AdminDashboardController: currentAdmin is null, cannot set controller");
-            return;
-        }
-        
-        try {
-            // Use JavaFX lookup with fx:id from the FXML
-            if (rootPane != null && rootPane.getScene() != null && tabPane != null) {
-                // Search in tab content
-                for (Tab tab : tabPane.getTabs()) {
-                    if ("Pending Reports Review".equals(tab.getText())) {
-                        System.out.println("AdminDashboardController: Found 'Pending Reports Review' tab");
-                        if (tab.getContent() != null && tab.getContent() instanceof Parent) {
-                            Parent tabContent = (Parent) tab.getContent();
-                            System.out.println("AdminDashboardController: Tab content is Parent");
-                            
-                            // The controller should be accessible via user data
-                            Object userData = tabContent.getProperties().get("controller");
-                            if (userData instanceof PendingReportsReviewController) {
-                                System.out.println("AdminDashboardController: Found controller via userData");
-                                pendingReportsReviewController = (PendingReportsReviewController) userData;
-                                pendingReportsReviewController.setCurrentAdmin(currentAdmin);
-                                return;
-                            }
-                            
-                            // Try finding by traversing
-                            pendingReportsReviewController = findControllerInParent(tabContent);
-                            if (pendingReportsReviewController != null) {
-                                System.out.println("AdminDashboardController: Found controller via traversal");
-                                pendingReportsReviewController.setCurrentAdmin(currentAdmin);
-                                return;
-                            }
-                            
-                            System.out.println("AdminDashboardController: Controller not found in tab content");
-                        } else {
-                            System.out.println("AdminDashboardController: Tab content is null or not Parent");
-                        }
-                    }
-                }
-            } else {
-                System.out.println("AdminDashboardController: rootPane, scene, or tabPane is null");
-            }
-        } catch (Exception e) {
-            System.err.println("Could not find PendingReportsReviewController: " + e.getMessage());
-            e.printStackTrace();
+
+    private void pushAdminToPendingController() {
+        if (pendingReportsReviewController != null && currentAdmin != null) {
+            pendingReportsReviewController.setCurrentAdmin(currentAdmin);
+        } else if (pendingReportsReviewController == null) {
+            System.out.println("AdminDashboardController: PendingReportsReviewController not yet initialized");
         }
     }
-    
-    /**
-     * Recursively search for PendingReportsReviewController in parent and its children
-     */
-    private PendingReportsReviewController findControllerInParent(Parent parent) {
-        if (parent == null) return null;
-        
-        // Check user data properties
-        Object controller = parent.getProperties().get("controller");
-        if (controller instanceof PendingReportsReviewController) {
-            return (PendingReportsReviewController) controller;
+
+    private void refreshPendingReviewData() {
+        if (pendingReportsReviewController != null) {
+            pendingReportsReviewController.refreshPendingReports();
+            pendingReportsReviewController.refreshPendingEvidence();
+        } else {
+            System.err.println("AdminDashboardController: Cannot refresh pending reviews - controller unavailable");
         }
-        
-        // Recursively check children
-        for (javafx.scene.Node child : parent.getChildrenUnmodifiable()) {
-            if (child instanceof Parent) {
-                PendingReportsReviewController found = findControllerInParent((Parent) child);
-                if (found != null) {
-                    return found;
-                }
-            }
-        }
-        
-        return null;
     }
 
     /**

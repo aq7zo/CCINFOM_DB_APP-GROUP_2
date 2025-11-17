@@ -34,6 +34,7 @@ public class ReportIncidentController {
     private boolean initialized = false;
     private Consumer<IncidentReport> incidentCreatedCallback;
     private static final int FLAG_THRESHOLD_MONTH = 5;
+    private static final int MIN_DESCRIPTION_LENGTH = 10;
 
     @FXML
     private void initialize() {
@@ -58,6 +59,8 @@ public class ReportIncidentController {
         identifierField.textProperty().addListener((obs, old, newVal) -> validateForm());
         attackTypeCombo.valueProperty().addListener((obs, old, newVal) -> validateForm());
         descriptionArea.textProperty().addListener((obs, old, newVal) -> validateForm());
+
+        validateForm();
     }
 
     public void setCurrentVictim(Victim victim) {
@@ -79,7 +82,11 @@ public class ReportIncidentController {
                     .toList();
             
             attackTypeCombo.setItems(FXCollections.observableArrayList(names));
+            if (!names.isEmpty()) {
+                attackTypeCombo.getSelectionModel().selectFirst();
+            }
             System.out.println("Loaded " + names.size() + " attack types into ComboBox");
+            validateForm();
         } catch (Exception e) {
             showError("Failed to load attack types: " + e.getMessage());
             e.printStackTrace();
@@ -153,12 +160,26 @@ public class ReportIncidentController {
 
     private boolean validateForm() {
         boolean valid = true;
-        String id = identifierField.getText().trim();
+        String id = identifierField.getText() != null ? identifierField.getText().trim() : "";
         String attack = attackTypeCombo.getValue();
-        String desc = descriptionArea.getText().trim();
+        String desc = descriptionArea.getText() != null ? descriptionArea.getText().trim() : "";
 
-        if (id.isEmpty() || attack == null || desc.isEmpty() || desc.length() < 10) {
-            valid = false;
+        boolean hasIdentifier = !id.isEmpty();
+        boolean hasAttackSelection = attack != null && !attack.isBlank();
+        boolean hasDescription = desc.length() >= MIN_DESCRIPTION_LENGTH;
+
+        valid = hasIdentifier && hasAttackSelection && hasDescription;
+
+        if (statusLabel != null) {
+            if (valid) {
+                statusLabel.setText("");
+            } else if (!hasIdentifier) {
+                statusLabel.setText("Identifier is required.");
+            } else if (!hasAttackSelection) {
+                statusLabel.setText("Please choose an attack type.");
+            } else if (!hasDescription) {
+                statusLabel.setText("Description must be at least " + MIN_DESCRIPTION_LENGTH + " characters.");
+            }
         }
 
         submitButton.setDisable(!valid);
@@ -169,7 +190,11 @@ public class ReportIncidentController {
         identifierField.clear();
         associatedNameField.clear();
         descriptionArea.clear();
-        attackTypeCombo.setValue(null);
+        if (attackTypeCombo.getItems() != null && !attackTypeCombo.getItems().isEmpty()) {
+            attackTypeCombo.getSelectionModel().selectFirst();
+        } else {
+            attackTypeCombo.setValue(null);
+        }
         statusLabel.setText("");
         validateForm();
     }

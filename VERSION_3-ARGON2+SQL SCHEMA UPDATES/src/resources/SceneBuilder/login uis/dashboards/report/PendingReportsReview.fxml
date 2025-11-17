@@ -57,6 +57,7 @@
                     
                     <TableView fx:id="evidenceTable" prefHeight="480">
                         <columns>
+                            <TableColumn fx:id="evidenceSelectCol" text="Select" prefWidth="60"/>
                             <TableColumn fx:id="evidenceIdCol" text="Evidence ID" prefWidth="80"/>
                             <TableColumn fx:id="evidenceIncidentCol" text="Incident ID" prefWidth="100"/>
                             <TableColumn fx:id="evidenceTypeCol" text="Type" prefWidth="150"/>
