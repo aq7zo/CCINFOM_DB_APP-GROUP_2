@@ -281,6 +281,7 @@ public class ViewMyReportsController {
 
     /**
      * Refreshes the reports table by loading all reports for the current victim.
+     * This will update all columns including the evidence status column.
      */
     public void refreshReports() {
         if (currentVictim == null) return;
@@ -289,6 +290,8 @@ public class ViewMyReportsController {
             List<IncidentReport> reports = incidentDAO.findByVictimID(currentVictim.getVictimID());
             ObservableList<IncidentReport> observableReports = FXCollections.observableArrayList(reports);
             reportsTable.setItems(observableReports);
+            // Force refresh of table cells to ensure evidence status column updates
+            reportsTable.refresh();
         } catch (Exception e) {
             showError("Failed to load reports: " + e.getMessage());
             e.printStackTrace();

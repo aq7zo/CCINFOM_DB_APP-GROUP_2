@@ -37,7 +37,20 @@ public class VictimDashboardController {
      */
     @FXML
     private void initialize() {
-        // Currently no initialization logic needed
+        // Listen for tab changes to refresh data when tabs are selected
+        if (tabPane != null) {
+            tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+                if (newTab != null && viewMyReportsTabController != null) {
+                    // Refresh reports table when "View My Reports" tab is selected
+                    // This ensures status and evidence status columns are up-to-date
+                    // after reports are validated/rejected by admins or evidence is uploaded
+                    String tabText = newTab.getText();
+                    if (tabText != null && (tabText.equals("View My Reports") || tabText.equals("View Reports"))) {
+                        viewMyReportsTabController.refreshReports();
+                    }
+                }
+            });
+        }
     }
 
     /**
