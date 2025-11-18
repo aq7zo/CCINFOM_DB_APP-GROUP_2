@@ -9,19 +9,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Service layer for managing Administrator accounts.
- *
- * Handles all business logic related to administrators:
- * - Retrieval (by ID, email, or all)
- * - Updates (with full input validation)
- * - Deletion
- *
- * Acts as a clean boundary between controllers (UI) and the DAO layer.
- * Centralizes validation, logging, and error handling.
+ * Service class for Administrator management operations
+ * Handles business logic for Administrator CRUD operations
  */
 public class AdministratorService {
-    
-    // Single DAO instance — no need for DI in this small desktop app
     private final AdministratorDAO administratorDAO;
     
     public AdministratorService() {
@@ -29,135 +20,117 @@ public class AdministratorService {
     }
     
     /**
-     * Retrieves an administrator by their numeric ID.
-     *
-     * @param adminID the unique administrator ID
-     * @return Administrator object if found, null if not found or invalid ID
+     * Get administrator by ID
+     * @param adminID Administrator's ID
+     * @return Administrator object or null if not found
      */
     public Administrator getAdministratorById(int adminID) {
         if (!ValidationUtils.isPositive(adminID)) {
-            System.err.println("AdministratorService: Invalid admin ID provided: " + adminID);
+            System.err.println("Invalid administrator ID");
             return null;
         }
         
         try {
             return administratorDAO.findById(adminID);
         } catch (SQLException e) {
-            System.err.println("Database error while fetching admin ID " + adminID + ": " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error retrieving administrator: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * Retrieves an administrator by their contact email.
-     *
-     * @param email the administrator's email address
-     * @return Administrator object if found, null if invalid email or not found
+     * Get administrator by email
+     * @param email Administrator's email
+     * @return Administrator object or null if not found
      */
     public Administrator getAdministratorByEmail(String email) {
         if (!ValidationUtils.isValidEmail(email)) {
-            System.err.println("AdministratorService: Invalid or malformed email: " + email);
+            System.err.println("Invalid email format");
             return null;
         }
         
         try {
-            return administratorDAO.findByEmail(email.trim());
+            return administratorDAO.findByEmail(email);
         } catch (SQLException e) {
-            System.err.println("Database error while searching for admin email " + email + ": " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error retrieving administrator: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * Returns all administrators in the system.
-     *
-     * @return List of all Administrator objects, or null if database error occurs
+     * Get all administrators
+     * @return List of all administrators
      */
     public List<Administrator> getAllAdministrators() {
         try {
             return administratorDAO.findAll();
         } catch (SQLException e) {
-            System.err.println("Failed to retrieve all administrators: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error retrieving administrators: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * Updates an existing administrator's information.
-     * Performs full validation before attempting database update.
-     *
-     * @param admin the Administrator object with updated values
-     * @return true if update was successful, false otherwise
+     * Update administrator information
+     * @param admin Administrator object with updated data
+     * @return true if update successful
      */
     public boolean updateAdministrator(Administrator admin) {
         if (admin == null) {
-            System.err.println("AdministratorService: Cannot update null Administrator object");
+            System.err.println("Administrator object cannot be null");
             return false;
         }
         
-        // Validate all required fields
         if (!ValidationUtils.isPositive(admin.getAdminID())) {
-            System.err.println("AdministratorService: Invalid or missing Admin ID");
+            System.err.println("Invalid administrator ID");
             return false;
         }
         
         if (!ValidationUtils.isNotEmpty(admin.getName())) {
-            System.err.println("AdministratorService: Name cannot be empty");
+            System.err.println("Name cannot be empty");
             return false;
         }
         
         if (!ValidationUtils.isValidEmail(admin.getContactEmail())) {
-            System.err.println("AdministratorService: Invalid email format: " + admin.getContactEmail());
+            System.err.println("Invalid email format");
             return false;
         }
         
         try {
-            boolean success = administratorDAO.update(admin);
-            if (success) {
-                System.out.println("Administrator updated successfully: " + admin.getName() + 
-                                " (ID: " + admin.getAdminID() + ")");
+            boolean updated = administratorDAO.update(admin);
+            if (updated) {
+                System.out.println("Administrator updated successfully");
                 return true;
-            } else {
-                System.err.println("Update failed — no rows affected for Admin ID: " + admin.getAdminID());
-                return false;
             }
         } catch (SQLException e) {
-            System.err.println("Database error while updating administrator ID " + admin.getAdminID() + 
-                            ": " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            System.err.println("Error updating administrator: " + e.getMessage());
         }
+        
+        return false;
     }
     
     /**
-     * Deletes an administrator account.
-     *
-     * @param adminID the ID of the administrator to delete
-     * @return true if deletion was successful, false otherwise
+     * Delete administrator
+     * @param adminID Administrator's ID to delete
+     * @return true if deletion successful
      */
     public boolean deleteAdministrator(int adminID) {
         if (!ValidationUtils.isPositive(adminID)) {
-            System.err.println("AdministratorService: Cannot delete — invalid admin ID: " + adminID);
+            System.err.println("Invalid administrator ID");
             return false;
         }
         
         try {
-            boolean success = administratorDAO.delete(adminID);
-            if (success) {
-                System.out.println("Administrator deleted successfully (ID: " + adminID + ")");
+            boolean deleted = administratorDAO.delete(adminID);
+            if (deleted) {
+                System.out.println("Administrator deleted successfully");
                 return true;
-            } else {
-                System.err.println("Delete failed — no rows affected for Admin ID: " + adminID);
-                return false;  // ✅ Add this line
             }
         } catch (SQLException e) {
-            System.err.println("Database error while deleting administrator ID " + adminID + 
-                            ": " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            System.err.println("Error deleting administrator: " + e.getMessage());
         }
+        
+        return false;
     }
 }
+

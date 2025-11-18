@@ -1,32 +1,24 @@
 package model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
- * Model class representing a known or suspected cybercrime perpetrator/actor.
- *
- * Maps directly to the Perpetrators table. Used to track repeat offenders,
- * scam phone numbers, fraudulent email addresses, and other malicious entities.
- * Central to threat intelligence and pattern recognition in the PhishNet system.
- *
- * The threat level is regularly updated by administrators and logged in ThreatLevelLog.
+ * Model for Perpetrators Record Management
+ * Fields: PerpetratorID, Identifier, IdentifierType, AssociatedName,
+ *         ThreatLevel, LastIncidentDate
  */
 public class Perpetrator {
-    
-    private int perpetratorID;                    // Primary key (auto-increment)
-    private String identifier;                    // Core identifier: phone, email, URL, wallet address, etc.
-    private String identifierType;                // e.g., "Phone Number", "Email Address", "Website", "Social Media"
-    private String associatedName;                // Optional alias or real name if known (e.g., "John Doe Scam Group")
-    private String threatLevel;                   // Current risk: "UnderReview", "Suspected", "Malicious", "Cleared"
-    private LocalDateTime lastIncidentDate;       // Most recent confirmed incident involving this actor
+    private int perpetratorID;
+    private String identifier;           // e.g., 09171234567, scam@fake.com
+    private String identifierType;       // Phone Number, Email Address, etc.
+    private String associatedName;       // Optional
+    private String threatLevel;          // UnderReview, Suspected, Malicious, Cleared
+    private LocalDateTime lastIncidentDate;
 
-    /** Default constructor — required for DAO and ResultSet mapping */
+    // Default constructor
     public Perpetrator() {}
 
-    /**
-     * Full constructor used when creating or updating perpetrator records.
-     */
+    // Constructor with required fields
     public Perpetrator(String identifier, String identifierType, String associatedName,
                        String threatLevel, LocalDateTime lastIncidentDate) {
         this.identifier = identifier;
@@ -36,53 +28,25 @@ public class Perpetrator {
         this.lastIncidentDate = lastIncidentDate;
     }
 
-    // === Getters and Setters ===
+    // Getters and Setters
+    public int getPerpetratorID() { return perpetratorID; }
+    public void setPerpetratorID(int perpetratorID) { this.perpetratorID = perpetratorID; }
 
-    public int getPerpetratorID() { 
-        return perpetratorID; 
-    }
-    public void setPerpetratorID(int perpetratorID) { 
-        this.perpetratorID = perpetratorID; 
-    }
+    public String getIdentifier() { return identifier; }
+    public void setIdentifier(String identifier) { this.identifier = identifier; }
 
-    public String getIdentifier() { 
-        return identifier; 
-    }
-    public void setIdentifier(String identifier) { 
-        this.identifier = identifier; 
-    }
+    public String getIdentifierType() { return identifierType; }
+    public void setIdentifierType(String identifierType) { this.identifierType = identifierType; }
 
-    public String getIdentifierType() { 
-        return identifierType; 
-    }
-    public void setIdentifierType(String identifierType) { 
-        this.identifierType = identifierType; 
-    }
+    public String getAssociatedName() { return associatedName; }
+    public void setAssociatedName(String associatedName) { this.associatedName = associatedName; }
 
-    public String getAssociatedName() { 
-        return associatedName; 
-    }
-    public void setAssociatedName(String associatedName) { 
-        this.associatedName = associatedName; 
-    }
+    public String getThreatLevel() { return threatLevel; }
+    public void setThreatLevel(String threatLevel) { this.threatLevel = threatLevel; }
 
-    public String getThreatLevel() { 
-        return threatLevel; 
-    }
-    public void setThreatLevel(String threatLevel) { 
-        this.threatLevel = threatLevel; 
-    }
+    public LocalDateTime getLastIncidentDate() { return lastIncidentDate; }
+    public void setLastIncidentDate(LocalDateTime lastIncidentDate) { this.lastIncidentDate = lastIncidentDate; }
 
-    public LocalDateTime getLastIncidentDate() { 
-        return lastIncidentDate; 
-    }
-    public void setLastIncidentDate(LocalDateTime lastIncidentDate) { 
-        this.lastIncidentDate = lastIncidentDate; 
-    }
-
-    /**
-     * Clean, readable representation — ideal for admin dashboards, logs, and dropdowns.
-     */
     @Override
     public String toString() {
         return String.format("Perpetrator[%d] %s (%s) - %s",

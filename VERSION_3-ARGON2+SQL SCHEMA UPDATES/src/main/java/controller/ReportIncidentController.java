@@ -12,53 +12,49 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Controller class for reporting incidents (Transaction 1).
- * Handles the UI interactions, form validation, and submission logic for incident reports.
+ * Transaction 1: Incident Reports
  */
 public class ReportIncidentController {
 
-    @FXML private TextField identifierField; // Input for perpetrator identifier
-    @FXML private ComboBox<String> identifierTypeCombo; // Dropdown for identifier type
-    @FXML private TextField associatedNameField; // Input for associated name (optional)
-    @FXML private ComboBox<String> attackTypeCombo; // Dropdown for attack type
-    @FXML private TextArea descriptionArea; // Text area for incident description
-    @FXML private Button submitButton; // Submit button for the form
-    @FXML private Label statusLabel; // Label for form validation messages
+    @FXML private TextField identifierField;
+    @FXML private ComboBox<String> identifierTypeCombo;
+    @FXML private TextField associatedNameField;
+    @FXML private ComboBox<String> attackTypeCombo;
+    @FXML private TextArea descriptionArea;
+    @FXML private Button submitButton;
+    @FXML private Label statusLabel;
 
-    private Victim currentVictim; // Currently selected victim
-    private final PerpetratorDAO perpDAO = new PerpetratorDAOImpl(); // DAO for perpetrators
-    private final AttackTypeDAO attackDAO = new AttackTypeDAOImpl(); // DAO for attack types
-    private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl(); // DAO for incident reports
-    private final ThreatLevelLogDAO threatLogDAO = new ThreatLevelLogDAOImpl(); // DAO for logging threat level changes
-    private final VictimDAO victimDAO = new VictimDAOImpl(); // DAO for victim accounts
-    private final VictimStatusLogDAO victimStatusLogDAO = new VictimStatusLogDAOImpl(); // DAO for logging victim status changes
+    private Victim currentVictim;
+    private final PerpetratorDAO perpDAO = new PerpetratorDAOImpl();
+    private final AttackTypeDAO attackDAO = new AttackTypeDAOImpl();
+    private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl();
+    private final ThreatLevelLogDAO threatLogDAO = new ThreatLevelLogDAOImpl();
+    private final VictimDAO victimDAO = new VictimDAOImpl();
+    private final VictimStatusLogDAO victimStatusLogDAO = new VictimStatusLogDAOImpl();
+    private boolean initialized = false;
+    private Consumer<IncidentReport> incidentCreatedCallback;
+    private static final int FLAG_THRESHOLD_MONTH = 5;
+    private static final int MIN_DESCRIPTION_LENGTH = 10;
 
-    private boolean initialized = false; // Prevent multiple initializations
-    private Consumer<IncidentReport> incidentCreatedCallback; // Callback after a successful report creation
-
-    private static final int FLAG_THRESHOLD_MONTH = 5; // Threshold for auto-flagging victims
-    private static final int MIN_DESCRIPTION_LENGTH = 10; // Minimum length for description
-
-    /**
-     * Initializes the controller.
-     * Loads identifier types, attack types, sets prompt texts, and adds listeners for real-time validation.
-     */
     @FXML
     private void initialize() {
-        if (initialized) return; // Prevent duplicate initialization
+        // Prevent multiple initializations
+        if (initialized) {
+            return;
+        }
         initialized = true;
 
-        // Load identifier types into ComboBox
+        // Load identifier types
         identifierTypeCombo.getItems().clear();
         identifierTypeCombo.setItems(FXCollections.observableArrayList(
                 "Phone Number", "Email Address", "Social Media Account / Username",
                 "Website URL / Domain", "IP Address"
         ));
         identifierTypeCombo.setValue("Phone Number");
-
-        // Set initial placeholder text for identifier field
+        
+        // Set initial prompt text
         updateIdentifierPromptText("Phone Number");
-
+        
         // Update prompt text when identifier type changes
         identifierTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
@@ -66,56 +62,47 @@ public class ReportIncidentController {
             }
         });
 
-        // Load attack types from database
+        // Load attack types
         loadAttackTypes();
 
-        // Add listeners for real-time form validation
+        // Real-time validation
         identifierField.textProperty().addListener((obs, old, newVal) -> validateForm());
         attackTypeCombo.valueProperty().addListener((obs, old, newVal) -> validateForm());
         descriptionArea.textProperty().addListener((obs, old, newVal) -> validateForm());
 
-        // Initial validation
         validateForm();
     }
 
-    /**
-     * Sets the current victim for whom the incident is being reported.
-     * @param victim The Victim object
-     */
     public void setCurrentVictim(Victim victim) {
         this.currentVictim = victim;
     }
 
-    /**
-     * Loads attack types from the database and populates the ComboBox.
-     */
     private void loadAttackTypes() {
         try {
+            // Clear existing items first to prevent duplicates
             if (attackTypeCombo.getItems() != null) {
-                attackTypeCombo.getItems().clear(); // Clear existing items
+                attackTypeCombo.getItems().clear();
             }
-
+            
             List<AttackType> types = attackDAO.findAll();
+            // Use distinct to ensure no duplicates (in case database has duplicates)
             List<String> names = types.stream()
                     .map(AttackType::getAttackName)
                     .distinct()
-                    .toList(); // Ensure unique names
-
+                    .toList();
+            
             attackTypeCombo.setItems(FXCollections.observableArrayList(names));
-            if (!names.isEmpty()) attackTypeCombo.getSelectionModel().selectFirst();
-
+            if (!names.isEmpty()) {
+                attackTypeCombo.getSelectionModel().selectFirst();
+            }
             System.out.println("Loaded " + names.size() + " attack types into ComboBox");
-            validateForm(); // Re-validate form after loading
+            validateForm();
         } catch (Exception e) {
             showError("Failed to load attack types: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Handles the submit button click.
-     * Validates input, creates or updates perpetrator, logs incident, auto-escalates threat levels, and auto-flags victims.
-     */
     @FXML
     private void handleSubmit() {
         if (!validateForm()) return;
@@ -123,12 +110,13 @@ public class ReportIncidentController {
         try {
             String identifier = identifierField.getText().trim();
             String type = identifierTypeCombo.getValue();
-            String dbIdentifierType = mapIdentifierTypeToDB(type); // Convert to database value
+            // Map UI identifier type to database ENUM value
+            String dbIdentifierType = mapIdentifierTypeToDB(type);
             String name = associatedNameField.getText().trim();
             String attackName = attackTypeCombo.getValue();
             String desc = descriptionArea.getText().trim();
 
-            // 1. Find existing perpetrator or create new
+            // 1. Find or create perpetrator
             Perpetrator perp = perpDAO.findByIdentifier(identifier);
             if (perp == null) {
                 perp = new Perpetrator();
@@ -139,12 +127,12 @@ public class ReportIncidentController {
                 perp.setLastIncidentDate(LocalDateTime.now());
                 perpDAO.create(perp);
             } else {
-                // Update last incident date for existing perpetrator
+                // Update last incident
                 perp.setLastIncidentDate(LocalDateTime.now());
                 perpDAO.update(perp);
             }
 
-            // 2. Create new incident report
+            // 2. Create incident
             IncidentReport report = new IncidentReport();
             report.setVictimID(currentVictim.getVictimID());
             report.setPerpetratorID(perp.getPerpetratorID());
@@ -154,26 +142,24 @@ public class ReportIncidentController {
             report.setStatus("Pending");
             incidentDAO.create(report);
 
-            // 3. Auto-escalate threat level if perpetrator has 3+ victims in last 7 days
+            // 3. Auto-escalate threat level
             int victimCount = incidentDAO.countVictimsLast7Days(perp.getPerpetratorID());
             if (victimCount >= 3 && !"Malicious".equals(perp.getThreatLevel())) {
                 String oldLevel = perp.getThreatLevel();
                 perp.setThreatLevel("Malicious");
                 perpDAO.update(perp);
-                threatLogDAO.logChange(perp.getPerpetratorID(), oldLevel, "Malicious", 1); // Admin ID = 1
+                threatLogDAO.logChange(perp.getPerpetratorID(), oldLevel, "Malicious", 1); // Admin 1
                 showAlert(Alert.AlertType.WARNING, "Perpetrator Escalated",
                         "Identifier: " + identifier + "\nNow marked as MALICIOUS (" + victimCount + " victims in 7 days)");
             }
 
-            // 4. Auto-flag victim if necessary
+            // 4. Auto-flag victim if threshold exceeded
             autoFlagVictimIfNeeded(report);
 
-            // Execute callback if set
             if (incidentCreatedCallback != null) {
                 incidentCreatedCallback.accept(report);
             }
 
-            // Show success message and clear form
             showAlert(Alert.AlertType.INFORMATION, "Success",
                     "Incident reported successfully!\nID: " + report.getIncidentID());
             clearForm();
@@ -184,10 +170,6 @@ public class ReportIncidentController {
         }
     }
 
-    /**
-     * Validates the form fields and updates the status label and submit button.
-     * @return true if form is valid
-     */
     private boolean validateForm() {
         boolean valid = true;
         String id = identifierField.getText() != null ? identifierField.getText().trim() : "";
@@ -217,43 +199,52 @@ public class ReportIncidentController {
     }
 
     /**
-     * Maps UI-friendly identifier type values to database ENUM values.
-     * @param uiType The identifier type from UI
-     * @return Database-compatible identifier type
+     * Maps UI identifier type values to database ENUM values
      */
     private String mapIdentifierTypeToDB(String uiType) {
         if (uiType == null) return null;
-
+        
         switch (uiType) {
-            case "Phone Number": return "Phone Number";
-            case "Email Address": return "Email Address";
-            case "Social Media Account / Username": return "Social Media Account";
-            case "Website URL / Domain": return "Website URL";
-            case "IP Address": return "IP Address";
-            default: return uiType;
+            case "Phone Number":
+                return "Phone Number";
+            case "Email Address":
+                return "Email Address";
+            case "Social Media Account / Username":
+                return "Social Media Account";
+            case "Website URL / Domain":
+                return "Website URL";
+            case "IP Address":
+                return "IP Address";
+            default:
+                return uiType; // Fallback to original value
         }
     }
 
-    /**
-     * Updates the prompt text for the identifier field based on selected type.
-     * @param identifierType Type of identifier selected
-     */
     private void updateIdentifierPromptText(String identifierType) {
         if (identifierField == null) return;
-
+        
         switch (identifierType) {
-            case "Phone Number": identifierField.setPromptText("+63-912-345-6789"); break;
-            case "Email Address": identifierField.setPromptText("example@email.com"); break;
-            case "Social Media Account / Username": identifierField.setPromptText("@someone67"); break;
-            case "Website URL / Domain": identifierField.setPromptText("fake.website.com"); break;
-            case "IP Address": identifierField.setPromptText("162.42.93.207"); break;
-            default: identifierField.setPromptText(""); break;
+            case "Phone Number":
+                identifierField.setPromptText("+63-912-345-6789");
+                break;
+            case "Email Address":
+                identifierField.setPromptText("example@email.com");
+                break;
+            case "Social Media Account / Username":
+                identifierField.setPromptText("@someone67");
+                break;
+            case "Website URL / Domain":
+                identifierField.setPromptText("fake.website.com");
+                break;
+            case "IP Address":
+                identifierField.setPromptText("162.42.93.207");
+                break;
+            default:
+                identifierField.setPromptText("");
+                break;
         }
     }
 
-    /**
-     * Clears the form fields and resets ComboBoxes and status label.
-     */
     private void clearForm() {
         identifierField.clear();
         associatedNameField.clear();
@@ -263,6 +254,7 @@ public class ReportIncidentController {
         } else {
             attackTypeCombo.setValue(null);
         }
+        // Restore prompt text after clearing
         if (identifierTypeCombo.getValue() != null) {
             updateIdentifierPromptText(identifierTypeCombo.getValue());
         }
@@ -270,18 +262,10 @@ public class ReportIncidentController {
         validateForm();
     }
 
-    /**
-     * Sets a callback to be executed after an incident report is successfully created.
-     * @param incidentCreatedCallback Callback function
-     */
     public void setIncidentCreatedCallback(Consumer<IncidentReport> incidentCreatedCallback) {
         this.incidentCreatedCallback = incidentCreatedCallback;
     }
 
-    /**
-     * Auto-flags victim if number of incidents exceeds threshold.
-     * @param report The incident report being processed
-     */
     private void autoFlagVictimIfNeeded(IncidentReport report) {
         if (currentVictim == null) return;
         try {
@@ -301,12 +285,6 @@ public class ReportIncidentController {
         }
     }
 
-    /**
-     * Shows an alert dialog.
-     * @param type Type of alert
-     * @param title Dialog title
-     * @param message Dialog content
-     */
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -315,19 +293,11 @@ public class ReportIncidentController {
         alert.showAndWait();
     }
 
-    /**
-     * Shows an error alert dialog.
-     * @param msg Error message
-     */
     private void showError(String msg) {
         showAlert(Alert.AlertType.ERROR, "Error", msg);
     }
 
-    /**
-     * Handles the cancel button click and closes the current window.
-     */
-    @FXML
-    private void handleCancel() {
+    @FXML private void handleCancel() {
         ((Stage) submitButton.getScene().getWindow()).close();
     }
 }

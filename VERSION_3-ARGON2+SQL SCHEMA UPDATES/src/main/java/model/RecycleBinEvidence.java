@@ -1,36 +1,19 @@
 package model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-/**
- * Model class representing a soft-deleted (archived) piece of evidence in the Recycle Bin.
- *
- * This entity maps to the RecycleBinEvidence table and stores a complete snapshot
- * of an evidence file when it is removed from an active incident (e.g., marked as
- * irrelevant, duplicate, or part of a rejected report). Preserves the original file path,
- * submission details, and full audit trail of who archived it and why.
- *
- * Essential for:
- * - Admin "Recycle Bin" recovery functionality
- * - Maintaining evidence integrity and chain of custody
- * - Supporting audit requirements and incident review
- */
 public class RecycleBinEvidence {
-    
-    private int binID;                    // Primary key of the recycle bin entry
-    private int evidenceID;               // Original EvidenceID from the main Evidence table
-    private Integer incidentID;           // Associated incident (nullable if evidence was standalone)
-    private String evidenceType;          // e.g., "Screenshot", "Email Header", "PDF Document"
-    private String filePath;              // Full server path to the archived file
-    private LocalDateTime submissionDate;// When the evidence was originally uploaded
-    private String originalStatus;        // Status before archiving (e.g., "Pending Review")
-    private Integer adminAssignedID;      // Admin originally assigned to review this evidence
-    private int rejectedByAdminID;        // Admin who moved this evidence to recycle bin
-    private String archiveReason;         // Reason for removal (e.g., "Irrelevant", "Duplicate")
-    private LocalDateTime archivedAt;     // Timestamp when evidence was archived
-
-    // === Getters and Setters ===
+    private int binID;
+    private int evidenceID;
+    private Integer incidentID;
+    private String evidenceType;
+    private String filePath;
+    private LocalDateTime submissionDate;
+    private String originalStatus;
+    private Integer adminAssignedID;
+    private int rejectedByAdminID;
+    private String archiveReason;
+    private LocalDateTime archivedAt;
 
     public int getBinID() {
         return binID;

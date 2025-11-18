@@ -16,70 +16,47 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
 
-/**
- * Controller for generating the Top Perpetrators report.
- * Handles selection of year/month, generation of the report,
- * displaying in TableView, and exporting to CSV.
- */
 public class TopPerpetratorsReportController {
 
-    @FXML private ComboBox<Integer> yearCombo;      // Dropdown for selecting year
-    @FXML private ComboBox<Integer> monthCombo;     // Dropdown for selecting month
-    @FXML private TableView<TopPerp> table;         // Table for displaying top perpetrators
-    @FXML private TableColumn<TopPerp, String> idCol;   // Column for identifier
-    @FXML private TableColumn<TopPerp, String> typeCol; // Column for identifier type
-    @FXML private TableColumn<TopPerp, String> nameCol; // Column for associated name
-    @FXML private TableColumn<TopPerp, Number> attacksCol; // Column for incident count
-    @FXML private Button generateButton;            // Button to generate report
-    @FXML private Button exportButton;              // Button to export report to CSV
+    @FXML private ComboBox<Integer> yearCombo;
+    @FXML private ComboBox<Integer> monthCombo;
+    @FXML private TableView<TopPerp> table;
+    @FXML private TableColumn<TopPerp, String> idCol;
+    @FXML private TableColumn<TopPerp, String> typeCol;
+    @FXML private TableColumn<TopPerp, String> nameCol;
+    @FXML private TableColumn<TopPerp, Number> attacksCol;
+    @FXML private Button generateButton;
+    @FXML private Button exportButton;
 
-    private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl(); // DAO for incident reports
-    private final PerpetratorDAO perpDAO = new PerpetratorDAOImpl();           // DAO for perpetrators
+    private final IncidentReportDAO incidentDAO = new IncidentReportDAOImpl();
+    private final PerpetratorDAO perpDAO = new PerpetratorDAOImpl();
 
-    /**
-     * Initializes the controller after FXML is loaded.
-     * Populates year/month ComboBoxes and sets up TableView columns.
-     */
     @FXML
     private void initialize() {
         int year = java.time.Year.now().getValue();
-
-        // Populate year ComboBox with last few years + current year
         yearCombo.setItems(FXCollections.observableArrayList(2020, 2021, 2022, 2023, 2024, year));
         yearCombo.setValue(year);
-
-        // Populate month ComboBox with all 12 months
         monthCombo.setItems(FXCollections.observableArrayList(1,2,3,4,5,6,7,8,9,10,11,12));
         monthCombo.setValue(java.time.Month.from(java.time.LocalDate.now()).getValue());
 
-        // Set up TableView columns to bind to TopPerp properties
         idCol.setCellValueFactory(d -> d.getValue().identifierProperty());
         typeCol.setCellValueFactory(d -> d.getValue().typeProperty());
         nameCol.setCellValueFactory(d -> d.getValue().nameProperty());
         attacksCol.setCellValueFactory(d -> d.getValue().countProperty());
 
-        // Initial validation to enable/disable generate button
         validate();
     }
 
-    /**
-     * Validates the input selections and enables/disables generate button.
-     */
     private void validate() {
         generateButton.setDisable(yearCombo.getValue() == null || monthCombo.getValue() == null);
     }
 
-    /**
-     * Handles generation of the Top Perpetrators report.
-     * Queries the database and populates the TableView.
-     */
     @FXML
     private void handleGenerate() {
         int year = yearCombo.getValue();
         int month = monthCombo.getValue();
 
         try {
-            // SQL query to fetch top 10 perpetrators for the selected year/month
             String sql = """
                 SELECT p.Identifier, p.IdentifierType, p.AssociatedName, COUNT(*) as cnt
                 FROM IncidentReports i
@@ -101,7 +78,6 @@ public class TopPerpetratorsReportController {
                 var rs = stmt.executeQuery();
 
                 int rowCount = 0;
-                // Iterate through query results and add to list
                 while (rs.next()) {
                     rowCount++;
                     list.add(new TopPerp(
@@ -114,10 +90,7 @@ public class TopPerpetratorsReportController {
                 System.out.println("TopPerpetratorsReportController: Query returned " + rowCount + " rows");
             }
 
-            // Populate TableView with results
             table.setItems(FXCollections.observableArrayList(list));
-
-            // Enable/disable export button based on whether data exists
             exportButton.setDisable(list.isEmpty());
             
             if (list.isEmpty()) {
@@ -134,19 +107,13 @@ public class TopPerpetratorsReportController {
         }
     }
 
-    /**
-     * Handles exporting the TableView data to a CSV file.
-     */
     @FXML
     private void handleExport() {
-        File file = new FileChooser().showSaveDialog(null); // Open save file dialog
-        if (file == null) return; // Cancelled by user
+        File file = new FileChooser().showSaveDialog(null);
+        if (file == null) return;
 
         try (PrintWriter pw = new PrintWriter(file)) {
-            // Write CSV header
             pw.println("Identifier,Type,Name,IncidentCount");
-
-            // Write each row from the TableView
             for (var row : table.getItems()) {
                 pw.println(row.getIdentifier() + "," + row.getType() + "," + row.getName() + "," + row.getCount());
             }
@@ -156,38 +123,20 @@ public class TopPerpetratorsReportController {
         }
     }
 
-    /**
-     * Shows an information alert with a message.
-     * @param msg the message to display
-     */
     private void showAlert(String msg) {
         new Alert(Alert.AlertType.INFORMATION, msg).show();
     }
 
-    /**
-     * Shows an error alert with a message.
-     * @param msg the message to display
-     */
     private void showError(String msg) {
         new Alert(Alert.AlertType.ERROR, msg).show();
     }
 
-    /**
-     * Represents a row in the Top Perpetrators TableView.
-     */
     public static class TopPerp {
-        private final SimpleStringProperty identifier; // Identifier of perpetrator
-        private final SimpleStringProperty type;       // Type of identifier
-        private final SimpleStringProperty name;       // Associated name
-        private final SimpleIntegerProperty count;     // Number of incidents
+        private final SimpleStringProperty identifier;
+        private final SimpleStringProperty type;
+        private final SimpleStringProperty name;
+        private final SimpleIntegerProperty count;
 
-        /**
-         * Constructor for TopPerp.
-         * @param i Identifier
-         * @param t Identifier Type
-         * @param n Associated Name
-         * @param c Incident Count
-         */
         public TopPerp(String i, String t, String n, int c) {
             this.identifier = new SimpleStringProperty(i);
             this.type = new SimpleStringProperty(t);

@@ -9,21 +9,12 @@ import util.ValidationUtils;
 import java.sql.SQLException;
 
 /**
- * Service layer for victim (public user) authentication and session management.
- *
- * Handles:
- * - Secure registration with Argon2id password hashing
- * - Secure login with proper verification
- * - Simple session tracking (current logged-in victim)
- * - Logout and session state checks
- *
- * This is the central point for all victim-facing authentication logic.
- * Keeps controllers clean and ensures consistent security practices.
+ * Service class for Victim authentication operations
+ * Handles victim registration and login
  */
 public class VictimAuthenticationService {
-    
     private final VictimDAO victimDAO;
-    private Victim currentVictim;   // Tracks the currently logged-in victim (simple session)
+    private Victim currentVictim;
 
     public VictimAuthenticationService() {
         this.victimDAO = new VictimDAOImpl();
@@ -31,146 +22,145 @@ public class VictimAuthenticationService {
     }
 
     /**
-     * Registers a new victim account (public signup).
-     *
-     * Performs full input validation, checks for duplicate emails,
-     * securely hashes the password using Argon2id, and creates the account.
-     *
-     * @param name     victim's full name
-     * @param email    victim's email (used as username)
-     * @param password plaintext password
-     * @return true if registration successful, false otherwise
+     * Register a new victim (public user signup)
+     * @param name Victim's full name
+     * @param email Victim's email
+     * @param password Victim's password
+     * @return true if registration successful
      */
     public boolean register(String name, String email, String password) {
-        // Input validation
+        // Validate inputs
         if (!ValidationUtils.isNotEmpty(name)) {
-            System.err.println("Registration failed: Name is required");
+            System.err.println("Name cannot be empty");
             return false;
         }
 
         if (!ValidationUtils.isValidEmail(email)) {
-            System.err.println("Registration failed: Invalid email format");
+            System.err.println("Invalid email format");
             return false;
         }
 
         if (!ValidationUtils.isValidPassword(password)) {
-            System.err.println("Registration failed: Password must be at least 6 characters");
+            System.err.println("Password must be at least 6 characters");
             return false;
         }
 
         try {
-            // Prevent duplicate accounts
+            // Check if email already exists
             Victim existing = victimDAO.findByEmail(email);
             if (existing != null) {
-                System.err.println("Registration failed: Email already registered: " + email);
+                System.err.println("Email already registered");
                 return false;
             }
 
-            // Securely hash the password
+            // Hash password with Argon2
             String passwordHash = SecurityUtils.hashPassword(password);
             if (passwordHash == null) {
-                System.err.println("Registration failed: Password hashing failed (security error)");
+                System.err.println("Failed to hash password. Please try again.");
                 return false;
             }
 
-            // Build and save new victim account
+            // Create new victim with password
             Victim newVictim = new Victim();
-            newVictim.setName(name.trim());
-            newVictim.setContactEmail(email.toLowerCase().trim());
+            newVictim.setName(name);
+            newVictim.setContactEmail(email);
             newVictim.setPasswordHash(passwordHash);
             newVictim.setAccountStatus("Active");
 
             boolean created = victimDAO.create(newVictim);
 
             if (created) {
-                System.out.println("New victim registered successfully: " + name + " (" + email + ")");
+                System.out.println("Registration successful! VictimID: " + newVictim.getVictimID() + ", Email: " + email);
                 return true;
             } else {
-                System.err.println("Registration failed: Database insert returned false");
-                return false;
+                System.err.println("Registration failed: victimDAO.create() returned false");
             }
 
         } catch (SQLException e) {
             System.err.println("Database error during registration: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Database error during registration", e);
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
         } catch (Exception e) {
             System.err.println("Unexpected error during registration: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Registration failed", e);
+            throw new RuntimeException("Registration error: " + e.getMessage(), e);
         }
+
+        return false;
     }
 
     /**
-     * Logs in a victim using email and password.
-     *
-     * @param email    victim's login email
-     * @param password plaintext password
-     * @return Victim object if login successful, null otherwise
+     * Authenticate victim with email and password
+     * @param email Victim's email
+     * @param password Victim's password
+     * @return Victim object if authentication successful, null otherwise
      */
     public Victim login(String email, String password) {
+        // Validate input
         if (!ValidationUtils.isValidEmail(email)) {
-            System.err.println("Login failed: Invalid email format");
+            System.err.println("Invalid email format");
             return null;
         }
 
         if (!ValidationUtils.isNotEmpty(password)) {
-            System.err.println("Login failed: Password cannot be empty");
+            System.err.println("Password cannot be empty");
             return null;
         }
 
         try {
-            Victim victim = victimDAO.findByEmail(email.toLowerCase().trim());
+            // Find victim by email
+            Victim victim = victimDAO.findByEmail(email);
 
             if (victim == null) {
-                System.err.println("Login failed: No account found with email: " + email);
+                System.err.println("No account found with this email");
                 return null;
             }
 
-            // Verify password using secure Argon2id comparison
-            boolean passwordValid = SecurityUtils.verifyPassword(password, victim.getPasswordHash());
-
-            if (passwordValid) {
-                this.currentVictim = victim;
-                System.out.println("Victim login successful: " + victim.getName() + " (" + email + ")");
-                return victim;
-            } else {
-                System.err.println("Login failed: Incorrect password for " + email);
+            // Verify password using Argon2
+            try {
+                if (SecurityUtils.verifyPassword(password, victim.getPasswordHash())) {
+                    currentVictim = victim;
+                    System.out.println("Login successful! Welcome, " + victim.getName());
+                    return victim;
+                } else {
+                    System.err.println("Invalid password");
+                    return null;
+                }
+            } catch (Exception e) {
+                System.err.println("Password verification error: " + e.getMessage());
                 return null;
             }
 
         } catch (SQLException e) {
-            System.err.println("Database error during login: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Database error during authentication: " + e.getMessage());
             return null;
         }
     }
 
     /**
-     * Logs out the currently authenticated victim.
+     * Logout current victim
      */
     public void logout() {
         if (currentVictim != null) {
-            System.out.println("Victim logged out: " + currentVictim.getName());
+            System.out.println("Logging out: " + currentVictim.getName());
             currentVictim = null;
         }
     }
 
     /**
-     * Returns the currently logged-in victim.
-     *
-     * @return current Victim object, or null if no one is logged in
+     * Get currently logged in victim
+     * @return Current Victim or null if not logged in
      */
     public Victim getCurrentVictim() {
         return currentVictim;
     }
 
     /**
-     * Checks whether a victim is currently logged in.
-     *
-     * @return true if a victim is authenticated, false otherwise
+     * Check if a victim is currently logged in
+     * @return true if victim is logged in
      */
     public boolean isLoggedIn() {
         return currentVictim != null;
     }
 }
+

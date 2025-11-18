@@ -3,28 +3,19 @@ package model;
 import java.time.LocalDateTime;
 
 /**
- * Model class representing a registered victim (public user) in the PhishNet system.
- *
- * Maps directly to the Victims table in the database.
- * Stores personal information, secure password hash (Argon2id), account status,
- * and creation timestamp. Used for victim registration, login, and incident reporting.
+ * Model class representing a Victim entity
  */
 public class Victim {
-    
-    private int victimID;                    // Primary key (auto-increment)
-    private String name;                     // Full name of the victim
-    private String contactEmail;             // Login email and primary contact method
-    private String passwordHash;             // Secure Argon2id hash — never store plaintext!
-    private String accountStatus;            // e.g., "Active", "Under Investigation", "Resolved"
-    private LocalDateTime dateCreated;       // When the account was registered
+    private int victimID;
+    private String name;
+    private String contactEmail;
+    private String passwordHash;
+    private String accountStatus;
+    private LocalDateTime dateCreated;
 
-    /** Default constructor — required for DAO operations and object mapping */
+    // Constructors
     public Victim() {}
 
-    /**
-     * Convenience constructor used during victim registration.
-     * Automatically sets account status to "Active".
-     */
     public Victim(String name, String contactEmail, String passwordHash) {
         this.name = name;
         this.contactEmail = contactEmail;
@@ -32,8 +23,7 @@ public class Victim {
         this.accountStatus = "Active";
     }
 
-    // === Getters and Setters ===
-
+    // Getters and Setters
     public int getVictimID() {
         return victimID;
     }
@@ -82,10 +72,6 @@ public class Victim {
         this.dateCreated = dateCreated;
     }
 
-    /**
-     * Human-readable string representation.
-     * Useful for logging, debugging, and displaying victim info in admin panels.
-     */
     @Override
     public String toString() {
         return String.format("VictimID: %d, Name: %s, Email: %s, Status: %s",

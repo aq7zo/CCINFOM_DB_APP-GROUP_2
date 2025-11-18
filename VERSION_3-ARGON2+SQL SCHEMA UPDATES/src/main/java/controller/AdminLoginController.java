@@ -16,56 +16,45 @@ import java.sql.SQLException;
 
 /**
  * Controller for the Administrator login modal.
- * Handles admin login, password visibility toggle, and navigation
- * to sign-up or admin dashboard screens.
  */
 public class AdminLoginController {
 
     private static final String AUTH_WINDOW_TITLE = "PhishNet - Cybersecurity Incident Reporting System";
 
-    @FXML private TextField     emailField1;             // Input field for admin email
-    @FXML private PasswordField passwordField1;          // Hidden password field
-    @FXML private TextField     passwordVisibleField1;   // Visible password field
-    @FXML private Button        togglePasswordButton1;   // Button to toggle password visibility
-    @FXML private ImageView     togglePasswordImageView1;// Image for toggle button (show/hide)
-    @FXML private Button        loginButton1;            // Button to login
-    @FXML private Button        signUpButton;            // Button to navigate to sign up
-    @FXML private Hyperlink     adminLoginLink;          // Link to login screen
+    @FXML private TextField     emailField1;
+    @FXML private PasswordField passwordField1;
+    @FXML private TextField     passwordVisibleField1;
+    @FXML private Button        togglePasswordButton1;
+    @FXML private ImageView     togglePasswordImageView1;
+    @FXML private Button        loginButton1;
+    @FXML private Button        signUpButton;
+    @FXML private Hyperlink     adminLoginLink;
 
     private final AdminAuthenticationService adminAuthService = new AdminAuthenticationService();
-    private boolean passwordVisible = false;               // Tracks password visibility state
+    private boolean passwordVisible = false;
 
-    /**
-     * Initializes the controller.
-     * Sets up listeners to synchronize password fields and toggle button visibility.
-     */
     @FXML private void initialize() {
         System.out.println("AdminLoginController initialized");
         
-        // Sync passwordField1 -> passwordVisibleField1 when hidden
+        // Sync password fields
         passwordField1.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!passwordVisible) {
                 passwordVisibleField1.setText(newVal);
             }
-            // Show toggle button only if password is not empty
+            // Show/hide button based on password length
             togglePasswordButton1.setVisible(newVal != null && newVal.length() > 0);
         });
         
-        // Sync passwordVisibleField1 -> passwordField1 when visible
         passwordVisibleField1.textProperty().addListener((obs, oldVal, newVal) -> {
             if (passwordVisible) {
                 passwordField1.setText(newVal);
             }
         });
         
-        // Initially hide the toggle button
+        // Initially hide the button
         togglePasswordButton1.setVisible(false);
     }
     
-    /**
-     * Toggles the visibility of the password.
-     * Switches between hidden (PasswordField) and visible (TextField) input.
-     */
     @FXML
     private void togglePasswordVisibility() {
         passwordVisible = !passwordVisible;
@@ -75,22 +64,18 @@ public class AdminLoginController {
             passwordVisibleField1.setText(passwordField1.getText());
             passwordVisibleField1.setVisible(true);
             passwordField1.setVisible(false);
-            // Change button icon to "hide"
+            // Change to hide icon
             togglePasswordImageView1.setImage(new Image(getClass().getResourceAsStream("/SceneBuilder/assets/hidepassword.png")));
         } else {
             // Hide password
             passwordField1.setText(passwordVisibleField1.getText());
             passwordField1.setVisible(true);
             passwordVisibleField1.setVisible(false);
-            // Change button icon to "show"
+            // Change to show icon
             togglePasswordImageView1.setImage(new Image(getClass().getResourceAsStream("/SceneBuilder/assets/showpassword.png")));
         }
     }
 
-    /**
-     * Handles admin login action.
-     * Validates input, authenticates admin, and navigates to dashboard if successful.
-     */
     @FXML
     private void handleLogin() {
         String email    = emailField1.getText().trim();
@@ -131,17 +116,13 @@ public class AdminLoginController {
         }
     }
 
-    /**
-     * Loads the admin dashboard screen after successful login.
-     * @param admin the logged-in Administrator object
-     */
     private void loadAdminDashboard(Administrator admin) {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/SceneBuilder/login uis/dashboards/AdminDashboard.fxml"));
             Parent root = loader.load();
 
-            // Get the controller of the dashboard and pass admin data
+            // Get the controller and pass admin data
             Object controller = loader.getController();
             if (controller != null) {
                 try {
@@ -164,12 +145,6 @@ public class AdminLoginController {
         }
     }
 
-    /**
-     * Shows a JavaFX alert dialog with the specified parameters.
-     * @param type the type of alert (e.g., INFORMATION, WARNING, ERROR)
-     * @param title the title of the alert
-     * @param message the content message of the alert
-     */
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -178,9 +153,6 @@ public class AdminLoginController {
         alert.showAndWait();
     }
 
-    /**
-     * Handles navigation to the sign-up screen.
-     */
     @FXML
     private void handleSignUp() {
         try {
@@ -198,9 +170,6 @@ public class AdminLoginController {
         }
     }
 
-    /**
-     * Handles navigation back to the admin login screen.
-     */
     @FXML
     private void handleAdminLogin() {
         try {

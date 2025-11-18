@@ -1,35 +1,20 @@
 package model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-/**
- * Model class representing a deleted/archived incident report in the "Recycle Bin".
- *
- * This entity maps to the RecycleBinReports table and stores a full snapshot
- * of an incident report when it is soft-deleted (e.g., rejected, marked as duplicate,
- * or cleaned up). It preserves all original data along with audit information
- * about who archived it and why.
- *
- * Used in the admin "Recycle Bin" feature to allow review, restoration,
- * or "deletion" of previously removed reports.
- */
 public class RecycleBinReport {
-    
-    private int binID;                    // Primary key of the recycle bin entry
-    private int incidentID;               // Original IncidentID from the main reports table
-    private Integer victimID;             // Nullable — victim who reported the incident
-    private Integer perpetratorID;        // Nullable — known/suspected attacker
-    private Integer attackTypeID;         // Nullable — type of cyberattack
-    private LocalDateTime dateReported;   // When the incident was originally reported
-    private String description;           // Full incident description
-    private String originalStatus;        // Status before archiving (e.g., "Pending", "Under Investigation")
-    private Integer adminAssignedID;      // Admin originally assigned to handle the case
-    private int rejectedByAdminID;        // Admin who moved the report to recycle bin
-    private String archiveReason;         // Reason for archiving (e.g., "False Positive", "Duplicate")
-    private LocalDateTime archivedAt;     // Timestamp when moved to recycle bin
-
-    // === Getters and Setters ===
+    private int binID;
+    private int incidentID;
+    private Integer victimID;
+    private Integer perpetratorID;
+    private Integer attackTypeID;
+    private LocalDateTime dateReported;
+    private String description;
+    private String originalStatus;
+    private Integer adminAssignedID;
+    private int rejectedByAdminID;
+    private String archiveReason;
+    private LocalDateTime archivedAt;
 
     public int getBinID() {
         return binID;
