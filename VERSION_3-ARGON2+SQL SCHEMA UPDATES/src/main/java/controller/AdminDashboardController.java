@@ -28,8 +28,12 @@ public class AdminDashboardController {
     @FXML private EvaluateReportsController evaluateReportsController;
     @FXML private AdminCreateReportController adminCreateReportController;
 
-    private Administrator currentAdmin;
+    private Administrator currentAdmin; // Currently logged-in administrator
 
+    /**
+     * Initializes the dashboard controller.
+     * Sets up tab selection listener and ensures nested controllers are ready.
+     */
     @FXML
     private void initialize() {
         System.out.println("AdminDashboardController initialized");
@@ -67,14 +71,16 @@ public class AdminDashboardController {
     }
 
     /**
-     * Set the currently logged-in administrator
-     * Called from AdminLoginController after successful login
+     * Set the currently logged-in administrator.
+     * Called from AdminLoginController after a successful login.
+     *
+     * @param admin The Administrator object representing the logged-in user.
      */
     public void setCurrentAdmin(Administrator admin) {
         this.currentAdmin = admin;
         if (admin != null) {
             String name = admin.getName();
-            // Truncate name if too long (max 30 characters for the name part)
+            // Truncate long names to 30 characters with ellipsis
             if (name != null && name.length() > 30) {
                 name = name.substring(0, 27) + "...";
             }
@@ -91,6 +97,10 @@ public class AdminDashboardController {
         }
     }
 
+    /**
+     * Push the current administrator to the PendingReportsReviewController.
+     * Ensures that the nested controller receives the admin information.
+     */
     private void pushAdminToPendingController() {
         if (pendingReportsReviewController != null && currentAdmin != null) {
             pendingReportsReviewController.setCurrentAdmin(currentAdmin);
@@ -115,6 +125,10 @@ public class AdminDashboardController {
         }
     }
 
+    /**
+     * Refresh the pending reports and evidence data in the nested controller.
+     * Called when switching to the "Pending Reports Review" tab.
+     */
     private void refreshPendingReviewData() {
         if (pendingReportsReviewController != null) {
             pendingReportsReviewController.refreshPendingReports();
@@ -133,7 +147,8 @@ public class AdminDashboardController {
     }
 
     /**
-     * Handle logout button click
+     * Handle logout button click.
+     * Loads the login scene and shows an informational alert.
      */
     @FXML
     private void handleLogout() {
@@ -141,12 +156,14 @@ public class AdminDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
             Parent root = loader.load();
 
+            // Switch to login scene
             Stage stage = (Stage) adminNameLabel.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 450));
             stage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
             stage.centerOnScreen();
             stage.show();
 
+            // Notify admin of successful logout
             showAlert(Alert.AlertType.INFORMATION, "Logged Out", "You have been logged out successfully.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -155,7 +172,11 @@ public class AdminDashboardController {
     }
 
     /**
-     * Show information alert
+     * Show an informational or confirmation alert.
+     *
+     * @param type  Alert type (INFO, WARNING, etc.)
+     * @param title Alert window title
+     * @param msg   Message to display
      */
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
@@ -166,7 +187,9 @@ public class AdminDashboardController {
     }
 
     /**
-     * Show error alert
+     * Show an error alert.
+     *
+     * @param msg Error message to display
      */
     private void showError(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -177,7 +200,10 @@ public class AdminDashboardController {
     }
 
     /**
-     * Get the current admin (for child controllers if needed)
+     * Get the current administrator.
+     * Useful for child controllers that need admin context.
+     *
+     * @return currentAdmin The currently logged-in administrator.
      */
     public Administrator getCurrentAdmin() {
         return currentAdmin;

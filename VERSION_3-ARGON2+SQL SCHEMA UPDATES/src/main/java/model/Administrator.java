@@ -3,18 +3,28 @@ package model;
 import java.time.LocalDateTime;
 
 /**
- * Model class representing an Administrator entity
+ * Model class representing an Administrator account in the PhishNet system.
+ *
+ * Maps directly to the Administrators table in the database.
+ * Stores sensitive data (password hash) and audit information (date assigned).
+ * Used throughout the application for authentication, session management,
+ * and admin user management.
  */
 public class Administrator {
-    private int adminID;
-    private String name;
-    private String role; // 'System Admin', 'Cybersecurity Staff'
-    private String contactEmail;
-    private String passwordHash; // Password stored as hash
-    private LocalDateTime dateAssigned;
+    
+    private int adminID;                    // Primary key
+    private String name;                    // Full name of the administrator
+    private String role;                    // e.g., "System Admin", "Cybersecurity Staff"
+    private String contactEmail;            // Login email + contact address
+    private String passwordHash;            // Argon2id hash of the password (never store plaintext!)
+    private LocalDateTime dateAssigned;     // When this admin account was created/assigned
 
+    /** Default constructor — required for DAO operations and JSON/FXML binding */
     public Administrator() {}
 
+    /**
+     * Convenience constructor for creating a new admin (e.g. during seeding or registration)
+     */
     public Administrator(String name, String role, String contactEmail, String passwordHash) {
         this.name = name;
         this.role = role;
@@ -22,7 +32,8 @@ public class Administrator {
         this.passwordHash = passwordHash;
     }
 
-    // Getters and Setters
+    // === Getters and Setters ===
+
     public int getAdminID() {
         return adminID;
     }
@@ -71,10 +82,12 @@ public class Administrator {
         this.dateAssigned = dateAssigned;
     }
 
+    /**
+     * Human-readable representation, useful for logging and debugging
+     */
     @Override
     public String toString() {
         return String.format("AdminID: %d, Name: %s, Role: %s, Email: %s",
                 adminID, name, role, contactEmail);
     }
 }
-

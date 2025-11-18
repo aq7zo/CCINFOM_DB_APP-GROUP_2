@@ -7,164 +7,138 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Utility class for security operations (password hashing with Argon2)
- * Complies with RA 10173 (Philippine Data Privacy Act)
- * 
- * Uses Argon2id for password hashing, which provides protection against
- * both side-channel attacks and GPU cracking attempts.
+ * Central security utility class for the entire PhishNet application.
+ * Handles password hashing/verification using Argon2id (current best practice),
+ * supports legacy SHA-256 hashes during migration, provides basic encryption
+ * (Base64 placeholder), and includes data anonymization helpers for RA 10173
+ * (Philippine Data Privacy Act) compliance.
+ *
+ * This is the single source of truth for all security-related operations.
+ * All password-related code in the app should go through these methods.
  */
 public class SecurityUtils {
-    // Argon2 configuration parameters
-    private static final int ITERATIONS = 3;              // Time cost (number of iterations)
-    private static final int MEMORY_COST = 65536;         // Memory cost (64 MB in KB)
-    private static final int PARALLELISM = 4;            // Degree of parallelism (threads)
-    private static final int SALT_LENGTH = 16;           // Salt length in bytes
-    private static final int HASH_LENGTH = 32;           // Hash length in bytes
     
-    // Argon2 function instance with configured parameters (Argon2id variant)
-    // Initialize as static final for better performance
+    // Argon2id configuration — carefully chosen balance between security and performance
+    private static final int ITERATIONS     = 3;       // Time cost
+    private static final int MEMORY_COST    = 65536;   // 64 MiB memory usage
+    private static final int PARALLELISM    = 4;       // Use 4 threads
+    private static final int SALT_LENGTH   = 16;       // 128-bit salt
+    private static final int HASH_LENGTH    = 32;      // 256-bit output hash
+    
+    // Pre-configured Argon2id instance — reused for performance
     private static final Argon2Function ARGON2_FUNCTION;
     
     static {
-        // Initialize Argon2Function with Argon2id variant
+        // Initialize once at class load time — faster than recreating every time
         ARGON2_FUNCTION = Argon2Function.getInstance(
-                MEMORY_COST,      // Memory cost in KB
-                ITERATIONS,       // Iterations
-                PARALLELISM,      // Parallelism
-                HASH_LENGTH,      // Hash length
-                Argon2.ID         // Argon2id variant
+                MEMORY_COST,      // memory in KiB
+                ITERATIONS,
+                PARALLELISM,
+                HASH_LENGTH,
+                Argon2.ID         // Argon2id = best resistance to side-channel + GPU attacks
         );
     }
     
     /**
-     * Hash password using Argon2id
-     * 
-     * Creates an Argon2id hash with secure parameters. The encoded string
-     * contains all metadata (algorithm, version, parameters, salt, hash).
-     * 
-     * @param password Plain text password to hash
-     * @return Encoded Argon2 hash string (contains all metadata), or null if error
+     * Hashes a plaintext password using Argon2id with strong, fixed parameters.
+     * The returned string is fully self-contained — includes version, parameters,
+     * salt, and hash — so verification can extract everything automatically.
+     *
+     * @param password the plaintext password (never log or store this!)
+     * @return fully encoded Argon2 hash string, or null if input is invalid or error occurs
      */
     public static String hashPassword(String password) {
         if (password == null || password.isEmpty()) {
             return null;
         }
         
-        // Validate password length to prevent DoS via excessive hashing
+        // Prevent DoS by rejecting absurdly long passwords
         if (password.length() > 128) {
-            System.err.println("Password exceeds maximum length of 128 characters");
+            System.err.println("Password exceeds maximum allowed length (128 chars)");
             return null;
         }
         
         try {
-            // Hash password with Argon2id using configured parameters
-            // Using .with(ARGON2_FUNCTION) embeds our specific parameters in the hash
-            // Verification must use the same method to ensure compatibility
-            String encodedHash = Password.hash(password)
-                    .with(ARGON2_FUNCTION)       // Use configured Argon2 function with specific parameters
+            // We explicitly use our pre-configured ARGON2_FUNCTION
+            // This ensures consistency between hashing and verification
+            return Password.hash(password)
+                    .with(ARGON2_FUNCTION)
                     .getResult();
-            
-            return encodedHash;
-            
+                    
         } catch (Exception e) {
-            System.err.println("Argon2 hashing error: " + e.getMessage());
-            System.err.println("Error type: " + e.getClass().getName());
+            System.err.println("Argon2 hashing failed: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
     }
     
     /**
-     * Verify password against stored Argon2 hash
+     * Verifies a plaintext password against a stored Argon2 (or legacy SHA-256) hash.
      * 
-     * Extracts parameters from the encoded hash string and verifies the password.
-     * Uses constant-time comparison internally to prevent timing attacks.
-     * 
-     * @param password Plain text password to verify
-     * @param encodedHash Stored Argon2 encoded hash string
-     * @return true if password matches hash, false otherwise
+     * IMPORTANT: Must use the exact same Argon2Function instance used during hashing.
+     * Using .withArgon2() instead of .with(ARGON2_FUNCTION) WILL fail even with correct password.
+     *
+     * @param password the plaintext password to check
+     * @param encodedHash the stored hash (from DB)
+     * @return true if password matches, false otherwise
      */
     public static boolean verifyPassword(String password, String encodedHash) {
         if (password == null || encodedHash == null || encodedHash.isEmpty()) {
             return false;
         }
         
-        // Trim hash to remove any whitespace that might have been introduced from database
         encodedHash = encodedHash.trim();
         
-        // Validate password length
         if (password.length() > 128) {
             return false;
         }
         
         try {
-            // Check if it's a legacy SHA-256 hash (for migration support)
-            if (!encodedHash.startsWith("$argon2id$") && !encodedHash.startsWith("$argon2i$") && 
-                !encodedHash.startsWith("$argon2d$")) {
-                // Legacy SHA-256 hash support (for migration)
+            // Support for old SHA-256 hashes during migration period
+            if (!encodedHash.startsWith("$argon2")) {
                 return verifyLegacyHash(password, encodedHash);
             }
             
-            // Verify password using Argon2
-            // CRITICAL: Must use .with(ARGON2_FUNCTION) because that's how hashes are generated
-            // Test results show: ARGON2_FUNCTION generate + ARGON2_FUNCTION verify = SUCCESS
-            //                   ARGON2_FUNCTION generate + .withArgon2() verify = FAILED
-            boolean matches = Password.check(password, encodedHash)
-                    .with(ARGON2_FUNCTION);
-            
-            return matches;
+            // Critical: Use the exact same function used when hashing
+            return Password.check(password, encodedHash)
+                    .with(ARGON2_FUNCTION);   // This is the only way that works reliably
             
         } catch (Exception e) {
-            System.err.println("Argon2 verification error: " + e.getMessage());
-            System.err.println("Hash format check - starts with $argon2id$: " + encodedHash.startsWith("$argon2id$"));
+            System.err.println("Password verification failed: " + e.getMessage());
+            System.err.println("Hash starts with $argon2id$: " + encodedHash.startsWith("$argon2id$"));
             System.err.println("Hash length: " + encodedHash.length());
-            System.err.println("Hash preview (first 50 chars): " + (encodedHash.length() > 50 ? encodedHash.substring(0, 50) + "..." : encodedHash));
             e.printStackTrace();
             return false;
         }
     }
     
     /**
-     * Legacy SHA-256 verification for backward compatibility during migration
-     * This method supports old SHA-256 hashes during the transition period
-     * 
-     * @param password Plain text password
-     * @param hash SHA-256 hash (hexadecimal string)
-     * @return true if password matches hash
+     * Legacy SHA-256 verification — kept only to support old accounts during migration.
+     * Once all accounts use Argon2, this can be removed.
      */
     private static boolean verifyLegacyHash(String password, String hash) {
         try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] passwordHash = md.digest(password.getBytes(StandardCharsets.UTF_8));
+            byte[] digest = md.digest(password.getBytes(StandardCharsets.UTF_8));
             
-            // Convert to hexadecimal string
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : passwordHash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
+            StringBuilder hex = new StringBuilder();
+            for (byte b : digest) {
+                String h = Integer.toHexString(0xff & b);
+                if (h.length() == 1) hex.append('0');
+                hex.append(h);
             }
             
-            // Constant-time comparison to prevent timing attacks
-            return constantTimeEquals(hexString.toString(), hash);
+            return constantTimeEquals(hex.toString(), hash.toLowerCase());
         } catch (Exception e) {
             return false;
         }
     }
     
     /**
-     * Constant-time string comparison to prevent timing attacks
-     * 
-     * @param a First string
-     * @param b Second string
-     * @return true if strings are equal
+     * Constant-time string comparison — prevents timing attacks.
      */
     private static boolean constantTimeEquals(String a, String b) {
-        if (a.length() != b.length()) {
-            return false;
-        }
+        if (a.length() != b.length()) return false;
         int result = 0;
         for (int i = 0; i < a.length(); i++) {
             result |= a.charAt(i) ^ b.charAt(i);
@@ -173,65 +147,53 @@ public class SecurityUtils {
     }
     
     /**
-     * Simple encryption for sensitive data (email addresses)
-     * In production, use stronger encryption like AES
+     * Very lightweight "encryption" using Base64 — placeholder only.
+     * In production, replace with proper AES-GCM or similar.
      */
     public static String encrypt(String data) {
-        if (data == null || data.isEmpty()) {
-            return data;
-        }
+        if (data == null || data.isEmpty()) return data;
         try {
-            // Simple Base64 encoding (for demonstration)
-            // In production, use proper encryption
-            return java.util.Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
+            return java.util.Base64.getEncoder()
+                    .encodeToString(data.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            System.err.println("Encryption error: " + e.getMessage());
+            System.err.println("Encryption failed: " + e.getMessage());
             return data;
         }
     }
     
     /**
-     * Decrypt data
+     * Decrypts data previously encrypted with encrypt().
      */
     public static String decrypt(String encryptedData) {
-        if (encryptedData == null || encryptedData.isEmpty()) {
-            return encryptedData;
-        }
+        if (encryptedData == null || encryptedData.isEmpty()) return encryptedData;
         try {
             byte[] decoded = java.util.Base64.getDecoder().decode(encryptedData);
             return new String(decoded, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            System.err.println("Decryption error: " + e.getMessage());
+            System.err.println("Decryption failed: " + e.getMessage());
             return encryptedData;
         }
     }
     
     /**
-     * Anonymize data for reports (RA 10173 compliance)
+     * Anonymizes email for reports/logs — complies with RA 10173.
+     * Example: john.doe@example.com → jo***@example.com
      */
     public static String anonymizeEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            return email;
-        }
-        int atIndex = email.indexOf('@');
-        if (atIndex > 0) {
-            String localPart = email.substring(0, Math.min(2, atIndex));
-            return localPart + "***@" + email.substring(atIndex + 1);
+        if (email == null || email.isEmpty()) return email;
+        int at = email.indexOf('@');
+        if (at > 1) {
+            return email.substring(0, 2) + "***@" + email.substring(at + 1);
         }
         return "***@***";
     }
     
     /**
-     * Anonymize name (show only first letter)
+     * Anonymizes full name — shows only first letter.
+     * Example: "Juan Dela Cruz" → "J***"
      */
     public static String anonymizeName(String name) {
-        if (name == null || name.isEmpty()) {
-            return name;
-        }
-        if (name.length() > 1) {
-            return name.charAt(0) + "***";
-        }
-        return "***";
+        if (name == null || name.isEmpty()) return name;
+        return name.charAt(0) + "***";
     }
 }
-
