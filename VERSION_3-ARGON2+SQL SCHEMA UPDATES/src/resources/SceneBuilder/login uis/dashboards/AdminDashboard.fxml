@@ -49,42 +49,27 @@
         </VBox>
     </top>
 
-    <!-- CENTER: 4 TABS -->
+    <!-- CENTER: TABS -->
     <center>
         <TabPane fx:id="tabPane" style="-fx-background-color: #f8f9fa;" tabClosingPolicy="UNAVAILABLE">
             <tabs>
 
-                <!-- TAB 1: Monthly Attack Trends -->
-                <Tab text="Monthly Attack Trends">
-                    <fx:include source="report/MonthlyAttackTrendsReport.fxml" />
+                <!-- TAB 1: Generate Report (consolidates all report types) -->
+                <Tab text="Generate Report">
+                    <fx:include fx:id="generateReport" source="report/GenerateReport.fxml" />
                 </Tab>
 
-                <!-- TAB 2: Top Perpetrators -->
-                <Tab text="Top Perpetrators">
-                    <fx:include source="report/TopPerpetratorsReport.fxml" />
-                </Tab>
-
-                <!-- TAB 3: Victim Activity -->
-                <Tab text="Victim Activity">
-                    <fx:include source="report/VictimActivityReport.fxml" />
-                </Tab>
-
-                <!-- TAB 4: Evidence Summary -->
-                <Tab text="Incident Evidence Summary">
-                    <fx:include source="report/IncidentEvidenceSummaryReport.fxml" />
-                </Tab>
-
-                <!-- TAB 5: Pending Reports Review -->
+                <!-- TAB 2: Pending Reports Review -->
                 <Tab text="Pending Reports Review">
                     <fx:include fx:id="pendingReportsReview" source="report/PendingReportsReview.fxml" />
                 </Tab>
 
-                <!-- TAB 6: Evaluate Reports -->
+                <!-- TAB 3: Evaluate Reports -->
                 <Tab text="Evaluate Reports">
                     <fx:include fx:id="evaluateReports" source="report/EvaluateReports.fxml" />
                 </Tab>
 
-                <!-- TAB 7: Manual Report -->
+                <!-- TAB 4: Manual Report -->
                 <Tab text="Manual Report">
                     <fx:include fx:id="adminCreateReport" source="report/AdminCreateReport.fxml" />
                 </Tab>
