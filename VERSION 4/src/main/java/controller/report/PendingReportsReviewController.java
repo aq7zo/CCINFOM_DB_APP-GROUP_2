@@ -89,6 +89,7 @@ public class PendingReportsReviewController {
     @FXML private Label previewMetadataLabel;
     @FXML private Label previewFilePathLabel;
     @FXML private Hyperlink openFileLocationLink;
+    @FXML private Hyperlink openInImageViewerLink;
 
     // Recycle Bin - Reports Table components
     @FXML private TableView<RecycleBinReport> recycleReportsTable;
@@ -841,6 +842,72 @@ public class PendingReportsReviewController {
 
         if (!Desktop.isDesktopSupported()) {
             showAlert(Alert.AlertType.WARNING, "Not Supported",
+                    "Opening file locations is not supported on this device. Please access the file manually:\n" + file.getAbsolutePath());
+            return;
+        }
+
+        try {
+            // Try to use Desktop.browseFileDirectory (Java 9+) to open folder and highlight file
+            try {
+                Desktop.getDesktop().browseFileDirectory(file);
+            } catch (UnsupportedOperationException | NoSuchMethodError e) {
+                // Fallback for older Java versions or unsupported systems
+                // Use platform-specific commands to open folder and select file
+                String os = System.getProperty("os.name").toLowerCase();
+                String absolutePath = file.getAbsolutePath();
+                
+                if (os.contains("win")) {
+                    // Windows: use explorer.exe /select
+                    Runtime.getRuntime().exec("explorer.exe /select,\"" + absolutePath + "\"");
+                } else if (os.contains("mac")) {
+                    // macOS: use open -R
+                    Runtime.getRuntime().exec(new String[]{"open", "-R", absolutePath});
+                } else if (os.contains("nix") || os.contains("nux")) {
+                    // Linux: try various file managers
+                    File parentDir = file.getParentFile();
+                    if (parentDir != null && parentDir.exists()) {
+                        try {
+                            Runtime.getRuntime().exec(new String[]{"xdg-open", parentDir.getAbsolutePath()});
+                        } catch (IOException ex) {
+                            // If xdg-open fails, try nautilus or other file managers
+                            Runtime.getRuntime().exec(new String[]{"nautilus", "--select", absolutePath});
+                        }
+                    }
+                } else {
+                    throw new UnsupportedOperationException("Unsupported operating system: " + os);
+                }
+            }
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Unable to Open File Location",
+                    "An error occurred while opening the file location:\n" + e.getMessage());
+        } catch (UnsupportedOperationException e) {
+            showAlert(Alert.AlertType.WARNING, "Not Supported",
+                    "Opening file locations is not supported on this system. Please access the file manually:\n" + file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    private void handleOpenInImageViewer() {
+        if (previewedEvidence == null) {
+            showAlert(Alert.AlertType.INFORMATION, "No Selection", "Select an evidence item to open in image viewer.");
+            return;
+        }
+
+        String filePath = previewedEvidence.getFilePath();
+        if (filePath == null || filePath.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Missing File", "This evidence record does not have a saved file path.");
+            return;
+        }
+
+        File file = new File(filePath);
+        if (!file.exists()) {
+            showAlert(Alert.AlertType.ERROR, "File Not Found",
+                    "The referenced file could not be found:\n" + file.getAbsolutePath());
+            return;
+        }
+
+        if (!Desktop.isDesktopSupported()) {
+            showAlert(Alert.AlertType.WARNING, "Not Supported",
                     "Opening files is not supported on this device. Please access the file manually:\n" + file.getAbsolutePath());
             return;
         }
@@ -896,6 +963,7 @@ public class PendingReportsReviewController {
             setPreviewImageVisible(false);
             togglePlaceholder(true, "Select an evidence item to preview.");
             toggleOpenFileLink(false);
+            toggleOpenInImageViewerLink(false);
             return;
         }
 
@@ -921,6 +989,7 @@ public class PendingReportsReviewController {
             setPreviewImageVisible(false);
             togglePlaceholder(true, "No file path is associated with this evidence.");
             toggleOpenFileLink(false);
+            toggleOpenInImageViewerLink(false);
             return;
         }
 
@@ -936,6 +1005,7 @@ public class PendingReportsReviewController {
             setPreviewImageVisible(false);
             togglePlaceholder(true, "The referenced file could not be found.");
             toggleOpenFileLink(false);
+            toggleOpenInImageViewerLink(false);
             return;
         }
 
@@ -949,7 +1019,12 @@ public class PendingReportsReviewController {
                     }
                     setPreviewImageVisible(true);
                     togglePlaceholder(false, null);
-                    toggleOpenFileLink(shouldOfferFullView(image));
+                    // Show file path label and "Open in Image Viewer" link below it
+                    if (previewFilePathLabel != null) {
+                        previewFilePathLabel.setText("File: " + file.getAbsolutePath());
+                    }
+                    toggleOpenFileLink(false);
+                    toggleOpenInImageViewerLink(true);
                     return;
                 }
             } catch (Exception ex) {
@@ -957,14 +1032,32 @@ public class PendingReportsReviewController {
                         + evidence.getEvidenceID() + ": " + ex.getMessage());
             }
             setPreviewImageVisible(false);
-            togglePlaceholder(true, "Unable to render the image preview. Use the link below to open the original file.");
+            togglePlaceholder(true, "Unable to render the image preview.");
+            // Show file path label below metadata and "Open File Location" link in StackPane
+            if (previewFilePathLabel != null) {
+                previewFilePathLabel.setText("File: " + file.getAbsolutePath());
+            }
+            if (openFileLocationLink != null) {
+                openFileLocationLink.setText("Open File Location");
+            }
             toggleOpenFileLink(true);
+            toggleOpenInImageViewerLink(false);
             return;
         }
 
+        // For non-image files, show file path below metadata and "Open File Location" link in StackPane
         setPreviewImageVisible(false);
-        togglePlaceholder(true, "Preview available for image uploads only. Use the link below to open the file.");
+        togglePlaceholder(false, null);
+        // Show file path label below "Submitted" metadata, just like for images
+        if (previewFilePathLabel != null) {
+            previewFilePathLabel.setText("File: " + file.getAbsolutePath());
+        }
+        // Show "Open File Location" link in StackPane (not showing the file path)
+        if (openFileLocationLink != null) {
+            openFileLocationLink.setText("Open File Location");
+        }
         toggleOpenFileLink(true);
+        toggleOpenInImageViewerLink(false);
     }
 
     private void setPreviewImageVisible(boolean visible) {
@@ -997,6 +1090,14 @@ public class PendingReportsReviewController {
         }
         openFileLocationLink.setVisible(show);
         openFileLocationLink.setManaged(show);
+    }
+
+    private void toggleOpenInImageViewerLink(boolean show) {
+        if (openInImageViewerLink == null) {
+            return;
+        }
+        openInImageViewerLink.setVisible(show);
+        openInImageViewerLink.setManaged(show);
     }
 
     private boolean isImageFile(String filePath) {

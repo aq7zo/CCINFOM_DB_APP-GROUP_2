@@ -78,13 +78,16 @@
                                 <VBox spacing="10" style="-fx-background-color: #ffffff; -fx-padding: 12; -fx-border-color: #e5e5e5; -fx-border-radius: 8; -fx-background-radius: 8;">
                                     <Label style="-fx-font-weight: bold; -fx-font-size: 14;" text="Evidence Preview" />
                                     <StackPane prefHeight="320" style="-fx-background-color: #f5f6f8; -fx-border-color: #e5e5e5; -fx-border-radius: 8; -fx-background-radius: 8;">
-                                        <ImageView fx:id="evidencePreviewImage" fitHeight="300" fitWidth="420" managed="false" preserveRatio="true" smooth="true" visible="false" />
-                                        <Label fx:id="previewPlaceholderLabel" style="-fx-text-fill: #6c757d;" text="Select an evidence item to preview." wrapText="true" StackPane.alignment="CENTER" />
+                                        <ImageView fx:id="evidencePreviewImage" fitHeight="300" fitWidth="420" managed="false" preserveRatio="true" smooth="true" visible="false" StackPane.alignment="CENTER" />
+                                        <VBox alignment="CENTER" spacing="10" StackPane.alignment="CENTER">
+                                            <Label fx:id="previewPlaceholderLabel" style="-fx-text-fill: #6c757d;" text="Select an evidence item to preview." wrapText="true" />
+                                            <Hyperlink fx:id="openFileLocationLink" managed="false" onAction="#handleOpenFileLocation" text="Open File Location" visible="false" />
+                                        </VBox>
                                     </StackPane>
                                     <Label fx:id="previewMetadataLabel" style="-fx-font-size: 12; -fx-text-fill: #333333;" wrapText="true" />
                                     <Label fx:id="previewFilePathLabel" style="-fx-font-size: 12; -fx-text-fill: #555555;" wrapText="true" />
-                                    <Hyperlink fx:id="openFileLocationLink" managed="false" onAction="#handleOpenFileLocation" text="Open in Image Viewer" visible="false" />
-                                    <Label style="-fx-font-size: 11; -fx-text-fill: #6c757d;" text="Only image evidence can be previewed here. Other file types rely on the file path link." wrapText="true" />
+                                    <Hyperlink fx:id="openInImageViewerLink" managed="false" onAction="#handleOpenInImageViewer" text="Open in Image Viewer" visible="false" />
+                                    <Label style="-fx-font-size: 11; -fx-text-fill: #6c757d;" text="Image files are previewed here. For non-image files, click the file path to open the folder and highlight the file." wrapText="true" />
                                 </VBox>
                             </ScrollPane>
                         </items>
