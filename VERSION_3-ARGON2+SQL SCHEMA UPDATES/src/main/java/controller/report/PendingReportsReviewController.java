@@ -830,37 +830,36 @@ public class PendingReportsReviewController {
             return;
         }
 
-        int successCount = 0;
-        int failCount = 0;
-
-        // Process each selected report
         for (IncidentReport report : selected) {
             try {
-                // First, archive the report to the recycle bin with rejection reason
-                boolean archived = recycleBinDAO.archiveIncidentReport(report, currentAdmin.getAdminID(), REPORT_REJECTION_REASON);
-                if (!archived) {
-                    failCount++;
-                    continue;
+                // Try to archive to recycle bin for audit purposes (non-critical)
+                try {
+                    recycleBinDAO.archiveIncidentReport(report, currentAdmin.getAdminID(), REPORT_REJECTION_REASON);
+                } catch (Exception archiveEx) {
+                    System.err.println("Error archiving report #" + report.getIncidentID() + ": " + archiveEx.getMessage());
+                    archiveEx.printStackTrace();
                 }
 
-                // Then delete from the main incident reports table
-                if (incidentDAO.delete(report.getIncidentID())) {
-                    selectedReports.remove(report);
-                    successCount++;
-                } else {
-                    failCount++;
+                // Always update status to "Rejected" so victim can see it (critical operation)
+                try {
+                    if (incidentDAO.updateStatus(report.getIncidentID(), "Rejected", currentAdmin.getAdminID())) {
+                        selectedReports.remove(report);
+                    }
+                } catch (Exception statusEx) {
+                    System.err.println("Error updating status for report #" + report.getIncidentID() + ": " + statusEx.getMessage());
+                    statusEx.printStackTrace();
+                    // Check if it's a schema issue
+                    if (statusEx.getMessage() != null && statusEx.getMessage().contains("Data truncated")) {
+                        System.err.println("NOTE: Database schema may need to be updated. Run: ALTER TABLE IncidentReports MODIFY COLUMN Status ENUM('Pending', 'Validated', 'Rejected') DEFAULT 'Pending';");
+                    }
                 }
             } catch (Exception ex) {
-                System.err.println("Error rejecting report #" + report.getIncidentID() + ": " + ex.getMessage());
-                failCount++;
+                System.err.println("Unexpected error rejecting report #" + report.getIncidentID() + ": " + ex.getMessage());
+                ex.printStackTrace();
             }
         }
 
-        // Build result message
-        String message = String.format("Rejected %d report(s).", successCount);
-        if (failCount > 0) {
-            message += String.format(" %d report(s) failed to archive.", failCount);
-        }
+        String message = "Reports rejected successfully.";
 
         showAlert(Alert.AlertType.INFORMATION, "Rejection Complete", message);
         

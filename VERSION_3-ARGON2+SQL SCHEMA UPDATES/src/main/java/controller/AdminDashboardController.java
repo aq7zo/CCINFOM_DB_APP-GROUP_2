@@ -1,6 +1,8 @@
 package controller;
 
 import controller.report.PendingReportsReviewController;
+import controller.report.EvaluateReportsController;
+import controller.report.AdminCreateReportController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,14 +18,15 @@ import java.io.IOException;
 
 /**
  * Admin Dashboard Controller
- * Main hub for administrators with multiple report tabs.
- * Handles initialization, tab switching, and logout functionality.
+ * Main hub for administrators with report tabs
  */
 public class AdminDashboardController {
 
-    @FXML private Label adminNameLabel; // Label to display the current admin's name
-    @FXML private TabPane tabPane; // TabPane containing different report tabs
-    @FXML private PendingReportsReviewController pendingReportsReviewController; // Nested controller for pending reports
+    @FXML private Label adminNameLabel;
+    @FXML private TabPane tabPane;
+    @FXML private PendingReportsReviewController pendingReportsReviewController;
+    @FXML private EvaluateReportsController evaluateReportsController;
+    @FXML private AdminCreateReportController adminCreateReportController;
 
     private Administrator currentAdmin; // Currently logged-in administrator
 
@@ -34,19 +37,37 @@ public class AdminDashboardController {
     @FXML
     private void initialize() {
         System.out.println("AdminDashboardController initialized");
-
-        // Add listener to refresh pending reports when "Pending Reports Review" tab is selected
+        
+        // Listen for tab changes to refresh data when tabs are selected
         if (tabPane != null) {
             tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-                if (newTab != null && "Pending Reports Review".equals(newTab.getText())) {
-                    // Refresh data on JavaFX Application Thread
-                    Platform.runLater(this::refreshPendingReviewData);
+                if (newTab != null) {
+                    if ("Pending Reports Review".equals(newTab.getText())) {
+                        // Refresh when this tab is selected
+                        Platform.runLater(() -> {
+                            refreshPendingReviewData();
+                        });
+                    } else if ("Evaluate Reports".equals(newTab.getText())) {
+                        // Refresh when Evaluate Reports tab is selected
+                        Platform.runLater(() -> {
+                            refreshEvaluateReportsData();
+                        });
+                    } else if ("Manual Report".equals(newTab.getText())) {
+                        // Setup admin for Manual Report tab
+                        Platform.runLater(() -> {
+                            pushAdminToCreateReportController();
+                        });
+                    }
                 }
             });
         }
-
-        // Push current admin to nested controller after scene is fully loaded
-        Platform.runLater(this::pushAdminToPendingController);
+        
+        // Try to find the controller after scene is ready
+        Platform.runLater(() -> {
+            pushAdminToPendingController();
+            pushAdminToEvaluateController();
+            pushAdminToCreateReportController();
+        });
     }
 
     /**
@@ -65,9 +86,14 @@ public class AdminDashboardController {
             }
             adminNameLabel.setText("Admin: " + (name != null ? name : "Unknown"));
             System.out.println("Admin set in dashboard: " + admin.getName());
-
-            // Push admin to nested controller after UI is ready
-            Platform.runLater(this::pushAdminToPendingController);
+            
+            // Find and set admin in child controllers
+            // Use Platform.runLater to ensure scene is fully initialized
+            Platform.runLater(() -> {
+                pushAdminToPendingController();
+                pushAdminToEvaluateController();
+                pushAdminToCreateReportController();
+            });
         }
     }
 
@@ -82,6 +108,22 @@ public class AdminDashboardController {
             System.out.println("AdminDashboardController: PendingReportsReviewController not yet initialized");
         }
     }
+    
+    private void pushAdminToEvaluateController() {
+        if (evaluateReportsController != null && currentAdmin != null) {
+            evaluateReportsController.setCurrentAdmin(currentAdmin);
+        } else if (evaluateReportsController == null) {
+            System.out.println("AdminDashboardController: EvaluateReportsController not yet initialized");
+        }
+    }
+    
+    private void pushAdminToCreateReportController() {
+        if (adminCreateReportController != null && currentAdmin != null) {
+            adminCreateReportController.setCurrentAdmin(currentAdmin);
+        } else if (adminCreateReportController == null) {
+            System.out.println("AdminDashboardController: AdminCreateReportController not yet initialized");
+        }
+    }
 
     /**
      * Refresh the pending reports and evidence data in the nested controller.
@@ -93,6 +135,14 @@ public class AdminDashboardController {
             pendingReportsReviewController.refreshPendingEvidence();
         } else {
             System.err.println("AdminDashboardController: Cannot refresh pending reviews - controller unavailable");
+        }
+    }
+    
+    private void refreshEvaluateReportsData() {
+        if (evaluateReportsController != null) {
+            evaluateReportsController.refreshReports();
+        } else {
+            System.err.println("AdminDashboardController: Cannot refresh evaluate reports - controller unavailable");
         }
     }
 

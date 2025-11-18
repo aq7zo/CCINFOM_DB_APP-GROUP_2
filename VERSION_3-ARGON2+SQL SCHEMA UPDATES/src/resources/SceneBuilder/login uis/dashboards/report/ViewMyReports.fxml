@@ -16,6 +16,7 @@
             <TableColumn fx:id="attackTypeCol" text="Attack Type" prefWidth="150"/>
             <TableColumn fx:id="perpetratorCol" text="Perpetrator Identifier" prefWidth="200"/>
             <TableColumn fx:id="statusCol" text="Status" prefWidth="120"/>
+            <TableColumn fx:id="evidenceStatusCol" text="Evidence Status" prefWidth="150"/>
             <TableColumn fx:id="descriptionCol" text="Description" prefWidth="250"/>
             <TableColumn fx:id="reviewedByCol" text="Reviewed By" prefWidth="150"/>
         </columns>

@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS IncidentReports (
     AdminID INT,
     DateReported DATETIME DEFAULT CURRENT_TIMESTAMP,
     Description TEXT,
-    Status ENUM('Pending', 'Validated') DEFAULT 'Pending',
+    Status ENUM('Pending', 'Validated', 'Rejected') DEFAULT 'Pending',
     FOREIGN KEY (VictimID) REFERENCES Victims(VictimID) ON DELETE CASCADE,
     FOREIGN KEY (PerpetratorID) REFERENCES Perpetrators(PerpetratorID) ON DELETE CASCADE,
     FOREIGN KEY (AttackTypeID) REFERENCES AttackTypes(AttackTypeID),

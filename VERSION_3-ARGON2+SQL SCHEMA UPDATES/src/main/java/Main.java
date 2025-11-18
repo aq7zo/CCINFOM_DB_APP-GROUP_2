@@ -31,7 +31,14 @@ public class Main extends Application {
             // Make sure the whole app quits when the last window is closed
             Platform.setImplicitExit(true);
             
-            // When the user clicks the X button, close everything properly
+            // Add shutdown hook to ensure clean exit when IDE closes
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutdown hook triggered - cleaning up...");
+                DatabaseConnection.closeConnection();
+                Platform.exit();
+            }));
+            
+            // Handle window close request
             primaryStage.setOnCloseRequest(e -> {
                 stop();              // close DB connection
                 Platform.exit();     // stop JavaFX
