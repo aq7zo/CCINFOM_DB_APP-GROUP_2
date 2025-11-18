@@ -37,11 +37,33 @@ public class RecycleBinDAOImpl implements RecycleBinDAO {
         (IncidentID, VictimID, PerpetratorID, AttackTypeID, AdminID, DateReported, Description, Status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """;
+    
+    private static final String UPDATE_REPORT_SQL = """
+        UPDATE IncidentReports
+        SET VictimID = ?, PerpetratorID = ?, AttackTypeID = ?, AdminID = ?, 
+            DateReported = ?, Description = ?, Status = ?
+        WHERE IncidentID = ?
+        """;
+    
+    private static final String CHECK_REPORT_EXISTS_SQL = """
+        SELECT COUNT(*) FROM IncidentReports WHERE IncidentID = ?
+        """;
 
     private static final String RESTORE_EVIDENCE_SQL = """
         INSERT INTO EvidenceUpload
         (EvidenceID, IncidentID, EvidenceType, FilePath, SubmissionDate, VerifiedStatus, AdminID)
         VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+    
+    private static final String UPDATE_EVIDENCE_SQL = """
+        UPDATE EvidenceUpload
+        SET IncidentID = ?, EvidenceType = ?, FilePath = ?, SubmissionDate = ?, 
+            VerifiedStatus = ?, AdminID = ?
+        WHERE EvidenceID = ?
+        """;
+    
+    private static final String CHECK_EVIDENCE_EXISTS_SQL = """
+        SELECT COUNT(*) FROM EvidenceUpload WHERE EvidenceID = ?
         """;
 
     @Override
@@ -100,27 +122,72 @@ public class RecycleBinDAOImpl implements RecycleBinDAO {
         try (Connection conn = DatabaseConnection.getConnection()) {
             boolean defaultAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            try (PreparedStatement insertStmt = conn.prepareStatement(RESTORE_REPORT_SQL);
-                 PreparedStatement deleteStmt = conn.prepareStatement(DELETE_RECYCLE_REPORT_SQL)) {
-
-                insertStmt.setInt(1, archivedReport.getIncidentID());
-                setInteger(insertStmt, 2, archivedReport.getVictimID());
-                setInteger(insertStmt, 3, archivedReport.getPerpetratorID());
-                setInteger(insertStmt, 4, archivedReport.getAttackTypeID());
-                setInteger(insertStmt, 5, archivedReport.getAdminAssignedID());
-                insertStmt.setString(6, DateUtils.toDatabaseFormat(
-                        archivedReport.getDateReported() != null ? archivedReport.getDateReported() : DateUtils.now()));
-                insertStmt.setString(7, archivedReport.getDescription());
+            
+            // Check if report already exists
+            boolean reportExists = false;
+            try (PreparedStatement checkStmt = conn.prepareStatement(CHECK_REPORT_EXISTS_SQL)) {
+                checkStmt.setInt(1, archivedReport.getIncidentID());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        reportExists = rs.getInt(1) > 0;
+                    }
+                }
+            }
+            
+            try {
                 String status = archivedReport.getOriginalStatus() != null ? archivedReport.getOriginalStatus() : "Pending";
-                insertStmt.setString(8, status);
-                insertStmt.executeUpdate();
-
-                deleteStmt.setInt(1, archivedReport.getBinID());
-                deleteStmt.executeUpdate();
-
-                conn.commit();
-                conn.setAutoCommit(defaultAutoCommit);
-                return true;
+                String dateReported = DateUtils.toDatabaseFormat(
+                        archivedReport.getDateReported() != null ? archivedReport.getDateReported() : DateUtils.now());
+                
+                if (reportExists) {
+                    // Update existing report
+                    try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_REPORT_SQL);
+                         PreparedStatement deleteStmt = conn.prepareStatement(DELETE_RECYCLE_REPORT_SQL)) {
+                        
+                        setInteger(updateStmt, 1, archivedReport.getVictimID());
+                        setInteger(updateStmt, 2, archivedReport.getPerpetratorID());
+                        setInteger(updateStmt, 3, archivedReport.getAttackTypeID());
+                        setInteger(updateStmt, 4, archivedReport.getAdminAssignedID());
+                        updateStmt.setString(5, dateReported);
+                        updateStmt.setString(6, archivedReport.getDescription());
+                        updateStmt.setString(7, status);
+                        updateStmt.setInt(8, archivedReport.getIncidentID());
+                        
+                        int rowsUpdated = updateStmt.executeUpdate();
+                        if (rowsUpdated == 0) {
+                            throw new SQLException("Failed to update report #" + archivedReport.getIncidentID());
+                        }
+                        
+                        deleteStmt.setInt(1, archivedReport.getBinID());
+                        deleteStmt.executeUpdate();
+                        
+                        conn.commit();
+                        conn.setAutoCommit(defaultAutoCommit);
+                        return true;
+                    }
+                } else {
+                    // Insert new report (shouldn't happen normally, but handle it)
+                    try (PreparedStatement insertStmt = conn.prepareStatement(RESTORE_REPORT_SQL);
+                         PreparedStatement deleteStmt = conn.prepareStatement(DELETE_RECYCLE_REPORT_SQL)) {
+                        
+                        insertStmt.setInt(1, archivedReport.getIncidentID());
+                        setInteger(insertStmt, 2, archivedReport.getVictimID());
+                        setInteger(insertStmt, 3, archivedReport.getPerpetratorID());
+                        setInteger(insertStmt, 4, archivedReport.getAttackTypeID());
+                        setInteger(insertStmt, 5, archivedReport.getAdminAssignedID());
+                        insertStmt.setString(6, dateReported);
+                        insertStmt.setString(7, archivedReport.getDescription());
+                        insertStmt.setString(8, status);
+                        insertStmt.executeUpdate();
+                        
+                        deleteStmt.setInt(1, archivedReport.getBinID());
+                        deleteStmt.executeUpdate();
+                        
+                        conn.commit();
+                        conn.setAutoCommit(defaultAutoCommit);
+                        return true;
+                    }
+                }
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
@@ -133,26 +200,70 @@ public class RecycleBinDAOImpl implements RecycleBinDAO {
         try (Connection conn = DatabaseConnection.getConnection()) {
             boolean defaultAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            try (PreparedStatement insertStmt = conn.prepareStatement(RESTORE_EVIDENCE_SQL);
-                 PreparedStatement deleteStmt = conn.prepareStatement(DELETE_RECYCLE_EVIDENCE_SQL)) {
-
-                insertStmt.setInt(1, archivedEvidence.getEvidenceID());
-                setInteger(insertStmt, 2, archivedEvidence.getIncidentID());
-                insertStmt.setString(3, archivedEvidence.getEvidenceType());
-                insertStmt.setString(4, archivedEvidence.getFilePath());
-                insertStmt.setString(5, DateUtils.toDatabaseFormat(
-                        archivedEvidence.getSubmissionDate() != null ? archivedEvidence.getSubmissionDate() : DateUtils.now()));
+            
+            // Check if evidence already exists
+            boolean evidenceExists = false;
+            try (PreparedStatement checkStmt = conn.prepareStatement(CHECK_EVIDENCE_EXISTS_SQL)) {
+                checkStmt.setInt(1, archivedEvidence.getEvidenceID());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        evidenceExists = rs.getInt(1) > 0;
+                    }
+                }
+            }
+            
+            try {
                 String status = archivedEvidence.getOriginalStatus() != null ? archivedEvidence.getOriginalStatus() : "Pending";
-                insertStmt.setString(6, status);
-                setInteger(insertStmt, 7, archivedEvidence.getAdminAssignedID());
-                insertStmt.executeUpdate();
-
-                deleteStmt.setInt(1, archivedEvidence.getBinID());
-                deleteStmt.executeUpdate();
-
-                conn.commit();
-                conn.setAutoCommit(defaultAutoCommit);
-                return true;
+                String submissionDate = DateUtils.toDatabaseFormat(
+                        archivedEvidence.getSubmissionDate() != null ? archivedEvidence.getSubmissionDate() : DateUtils.now());
+                
+                if (evidenceExists) {
+                    // Update existing evidence
+                    try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_EVIDENCE_SQL);
+                         PreparedStatement deleteStmt = conn.prepareStatement(DELETE_RECYCLE_EVIDENCE_SQL)) {
+                        
+                        setInteger(updateStmt, 1, archivedEvidence.getIncidentID());
+                        updateStmt.setString(2, archivedEvidence.getEvidenceType());
+                        updateStmt.setString(3, archivedEvidence.getFilePath());
+                        updateStmt.setString(4, submissionDate);
+                        updateStmt.setString(5, status);
+                        setInteger(updateStmt, 6, archivedEvidence.getAdminAssignedID());
+                        updateStmt.setInt(7, archivedEvidence.getEvidenceID());
+                        
+                        int rowsUpdated = updateStmt.executeUpdate();
+                        if (rowsUpdated == 0) {
+                            throw new SQLException("Failed to update evidence #" + archivedEvidence.getEvidenceID());
+                        }
+                        
+                        deleteStmt.setInt(1, archivedEvidence.getBinID());
+                        deleteStmt.executeUpdate();
+                        
+                        conn.commit();
+                        conn.setAutoCommit(defaultAutoCommit);
+                        return true;
+                    }
+                } else {
+                    // Insert new evidence
+                    try (PreparedStatement insertStmt = conn.prepareStatement(RESTORE_EVIDENCE_SQL);
+                         PreparedStatement deleteStmt = conn.prepareStatement(DELETE_RECYCLE_EVIDENCE_SQL)) {
+                        
+                        insertStmt.setInt(1, archivedEvidence.getEvidenceID());
+                        setInteger(insertStmt, 2, archivedEvidence.getIncidentID());
+                        insertStmt.setString(3, archivedEvidence.getEvidenceType());
+                        insertStmt.setString(4, archivedEvidence.getFilePath());
+                        insertStmt.setString(5, submissionDate);
+                        insertStmt.setString(6, status);
+                        setInteger(insertStmt, 7, archivedEvidence.getAdminAssignedID());
+                        insertStmt.executeUpdate();
+                        
+                        deleteStmt.setInt(1, archivedEvidence.getBinID());
+                        deleteStmt.executeUpdate();
+                        
+                        conn.commit();
+                        conn.setAutoCommit(defaultAutoCommit);
+                        return true;
+                    }
+                }
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;

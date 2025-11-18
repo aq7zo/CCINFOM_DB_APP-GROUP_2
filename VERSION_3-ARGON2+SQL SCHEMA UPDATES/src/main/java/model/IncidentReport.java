@@ -14,7 +14,7 @@ public class IncidentReport {
     private Integer adminID;           // Nullable
     private LocalDateTime dateReported;
     private String description;
-    private String status;             // Pending, Validated
+    private String status;             // Pending, Validated, Rejected
 
     // Default constructor
     public IncidentReport() {}

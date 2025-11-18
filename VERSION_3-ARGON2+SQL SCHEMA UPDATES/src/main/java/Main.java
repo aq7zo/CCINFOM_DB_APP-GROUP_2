@@ -25,6 +25,13 @@ public class Main extends Application {
             // Ensure application exits when window is closed
             Platform.setImplicitExit(true);
             
+            // Add shutdown hook to ensure clean exit when IDE closes
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutdown hook triggered - cleaning up...");
+                DatabaseConnection.closeConnection();
+                Platform.exit();
+            }));
+            
             // Handle window close request
             primaryStage.setOnCloseRequest(e -> {
                 stop();

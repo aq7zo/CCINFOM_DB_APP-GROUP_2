@@ -72,6 +72,22 @@ public class IncidentReportDAOImpl implements IncidentReportDAO {
     }
 
     @Override
+    public List<IncidentReport> findAll() throws SQLException {
+        String sql = "SELECT * FROM IncidentReports ORDER BY DateReported DESC";
+        List<IncidentReport> list = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(mapResultSetToIncidentReport(rs));
+            }
+        }
+        return list;
+    }
+
+    @Override
     public boolean updateStatus(int incidentID, String status, Integer adminID) throws SQLException {
         String sql = "UPDATE IncidentReports SET Status = ?, AdminID = ? WHERE IncidentID = ?";
 
