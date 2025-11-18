@@ -79,16 +79,6 @@
                     <fx:include fx:id="pendingReportsReview" source="report/PendingReportsReview.fxml" />
                 </Tab>
 
-                <!-- TAB 6: Evaluate Reports -->
-                <Tab text="Evaluate Reports">
-                    <fx:include fx:id="evaluateReports" source="report/EvaluateReports.fxml" />
-                </Tab>
-
-                <!-- TAB 7: Manual Report -->
-                <Tab text="Manual Report">
-                    <fx:include fx:id="adminCreateReport" source="report/AdminCreateReport.fxml" />
-                </Tab>
-
             </tabs>
         </TabPane>
     </center>
