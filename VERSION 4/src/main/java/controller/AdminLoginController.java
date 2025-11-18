@@ -139,7 +139,7 @@ public class AdminLoginController {
     private void loadAdminDashboard(Administrator admin) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/SceneBuilder/login uis/dashboards/AdminDashboard.fxml"));
+                    getClass().getResource("/SceneBuilder/fxml/admin/AdminDashboard.fxml"));
             Parent root = loader.load();
 
             // Get the controller and pass admin data
@@ -186,7 +186,7 @@ public class AdminLoginController {
     @FXML
     private void handleSignUp() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/SignUp.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/fxml/auth/SignUp.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();
@@ -206,7 +206,7 @@ public class AdminLoginController {
     @FXML
     private void handleAdminLogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/fxml/auth/Login.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loginButton1.getScene().getWindow();

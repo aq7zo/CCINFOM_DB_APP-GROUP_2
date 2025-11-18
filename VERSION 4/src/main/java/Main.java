@@ -23,7 +23,7 @@ public class Main extends Application {
 
     /**
      * Called by JavaFX when the app starts. Sets up the main window,
-     * tests the database, loads LogIn.fxml, and shows the login screen.
+     * tests the database, loads Login.fxml, and shows the login screen.
      */
     @Override
     public void start(Stage primaryStage) {
@@ -55,17 +55,17 @@ public class Main extends Application {
 
             System.out.println("Database connection successful!");
 
-            // Load the victim's login screen (LogIn.fxml)
-            java.net.URL fxmlUrl = Main.class.getClassLoader().getResource("SceneBuilder/login uis/LogIn.fxml");
+            // Load the victim's login screen (Login.fxml)
+            java.net.URL fxmlUrl = Main.class.getClassLoader().getResource("SceneBuilder/fxml/auth/Login.fxml");
             if (fxmlUrl == null) {
                 // Sometimes a leading slash is needed - try that too
-                fxmlUrl = Main.class.getClassLoader().getResource("/SceneBuilder/login uis/LogIn.fxml");
+                fxmlUrl = Main.class.getClassLoader().getResource("/SceneBuilder/fxml/auth/Login.fxml");
             }
             if (fxmlUrl == null) {
                 // Still can't find it - give a clear error message
                 throw new IOException("FXML file not found. Searched for:\n" +
-                        "- SceneBuilder/login uis/LogIn.fxml\n" +
-                        "- /SceneBuilder/login uis/LogIn.fxml\n" +
+                        "- SceneBuilder/fxml/auth/Login.fxml\n" +
+                        "- /SceneBuilder/fxml/auth/Login.fxml\n" +
                         "Make sure file exists in src/resources/ and run 'mvn clean compile'");
             }
             
@@ -85,10 +85,10 @@ public class Main extends Application {
         } catch (IOException e) {
             // Problem loading the FXML - give the user a helpful message
             e.printStackTrace();
-            String errorMsg = "Failed to load LogIn.fxml.\n\n";
-            errorMsg += "Expected path: /SceneBuilder/login uis/LogIn.fxml\n";
+            String errorMsg = "Failed to load Login.fxml.\n\n";
+            errorMsg += "Expected path: /SceneBuilder/fxml/auth/Login.fxml\n";
             errorMsg += "Check that:\n";
-            errorMsg += "1. File exists in src/resources/SceneBuilder/login uis/\n";
+            errorMsg += "1. File exists in src/resources/SceneBuilder/fxml/auth/\n";
             errorMsg += "2. Resources are copied to target/classes/\n";
             errorMsg += "3. Run 'mvn clean compile' to rebuild\n\n";
             errorMsg += "Error: " + e.getMessage();

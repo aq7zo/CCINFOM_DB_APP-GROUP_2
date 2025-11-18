@@ -28,7 +28,7 @@
                         <graphic>
                             <ImageView fx:id="togglePasswordImageView" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-                                    <Image url="@../assets/showpassword.png" />
+                                    <Image url="@../../assets/showpassword.png" />
                                 </image>
                             </ImageView>
                         </graphic>
@@ -55,7 +55,7 @@
                 <!-- Logo -->
                 <ImageView fitHeight="150.0" fitWidth="160.0" layoutX="71.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true">
                     <image>
-                        <Image url="@../assets/ccinfom%20phishnet%20logo.png" />
+                        <Image url="@../../assets/phishnet.png" />
                     </image>
                 </ImageView>
 

@@ -12,22 +12,22 @@
         <tabs>
             <!-- Sub-tab 1: Monthly Attack Trends -->
             <Tab text="Monthly Attack Trends">
-                <fx:include source="MonthlyAttackTrendsReport.fxml" />
+                <fx:include source="../../shared/MonthlyAttackTrendsReport.fxml" />
             </Tab>
 
             <!-- Sub-tab 2: Top Perpetrators -->
             <Tab text="Top Perpetrators">
-                <fx:include source="TopPerpetratorsReport.fxml" />
+                <fx:include source="../../shared/TopPerpetratorsReport.fxml" />
             </Tab>
 
             <!-- Sub-tab 3: Victim Activity -->
             <Tab text="Victim Activity">
-                <fx:include source="VictimActivityReport.fxml" />
+                <fx:include source="../../shared/VictimActivityReport.fxml" />
             </Tab>
 
             <!-- Sub-tab 4: Incident Evidence Summary -->
             <Tab text="Incident Evidence Summary">
-                <fx:include source="IncidentEvidenceSummaryReport.fxml" />
+                <fx:include source="../../shared/IncidentEvidenceSummaryReport.fxml" />
             </Tab>
         </tabs>
     </TabPane>

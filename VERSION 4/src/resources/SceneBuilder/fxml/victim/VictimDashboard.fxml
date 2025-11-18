@@ -58,13 +58,13 @@
         <TabPane fx:id="tabPane" style="-fx-background-color: #f8f9fa;" tabClosingPolicy="UNAVAILABLE">
             <tabs>
                 <Tab text="Submit Report">
-                    <fx:include fx:id="reportIncidentTab" source="report/ReportIncident.fxml" />
+                    <fx:include fx:id="reportIncidentTab" source="reports/ReportIncident.fxml" />
                 </Tab>
                 <Tab text="Upload Evidence">
-                    <fx:include fx:id="uploadEvidenceTab" source="report/UploadEvidence.fxml" />
+                    <fx:include fx:id="uploadEvidenceTab" source="reports/UploadEvidence.fxml" />
                 </Tab>
                 <Tab text="View My Reports">
-                    <fx:include fx:id="viewMyReportsTab" source="report/ViewMyReports.fxml" />
+                    <fx:include fx:id="viewMyReportsTab" source="reports/ViewMyReports.fxml" />
                 </Tab>
             </tabs>
         </TabPane>

@@ -56,22 +56,22 @@
 
                 <!-- TAB 1: Generate Report (consolidates all report types) -->
                 <Tab text="Generate Report">
-                    <fx:include fx:id="generateReport" source="report/GenerateReport.fxml" />
+                    <fx:include fx:id="generateReport" source="reports/GenerateReport.fxml" />
                 </Tab>
 
                 <!-- TAB 2: Pending Reports Review -->
                 <Tab text="Pending Reports Review">
-                    <fx:include fx:id="pendingReportsReview" source="report/PendingReportsReview.fxml" />
+                    <fx:include fx:id="pendingReportsReview" source="reports/PendingReportsReview.fxml" />
                 </Tab>
 
                 <!-- TAB 3: Evaluate Reports -->
                 <Tab text="Evaluate Reports">
-                    <fx:include fx:id="evaluateReports" source="report/EvaluateReports.fxml" />
+                    <fx:include fx:id="evaluateReports" source="reports/EvaluateReports.fxml" />
                 </Tab>
 
                 <!-- TAB 4: Manual Report -->
                 <Tab text="Manual Report">
-                    <fx:include fx:id="adminCreateReport" source="report/AdminCreateReport.fxml" />
+                    <fx:include fx:id="adminCreateReport" source="reports/AdminCreateReport.fxml" />
                 </Tab>
 
             </tabs>

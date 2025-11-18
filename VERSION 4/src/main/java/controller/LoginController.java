@@ -152,7 +152,7 @@ public class LoginController {
      */
     private void loadVictimDashboard(Victim victim) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/dashboards/VictimDashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/fxml/victim/VictimDashboard.fxml"));
             Parent root = loader.load();
 
             // Pass victim data to dashboard controller
@@ -176,7 +176,7 @@ public class LoginController {
      */
     @FXML
     private void handleSignUp() {
-        navigateToScene("/SceneBuilder/login uis/SignUp.fxml");
+        navigateToScene("/SceneBuilder/fxml/auth/SignUp.fxml");
     }
 
     /**
@@ -184,7 +184,7 @@ public class LoginController {
      */
     @FXML
     private void handleAdminLogin() {
-        navigateToScene("/SceneBuilder/login uis/AdminLogin.fxml");
+        navigateToScene("/SceneBuilder/fxml/auth/AdminLogin.fxml");
     }
 
     /**

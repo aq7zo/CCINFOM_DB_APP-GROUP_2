@@ -11,13 +11,13 @@
     <TabPane fx:id="tabPane" style="-fx-background-color: #f8f9fa;" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
             <Tab text="Submit Report">
-                <fx:include fx:id="reportIncidentTab" source="ReportIncident.fxml" />
+                <fx:include fx:id="reportIncidentTab" source="../../victim/reports/ReportIncident.fxml" />
             </Tab>
             <Tab text="Upload Evidence">
-                <fx:include fx:id="uploadEvidenceTab" source="UploadEvidence.fxml" />
+                <fx:include fx:id="uploadEvidenceTab" source="../../victim/reports/UploadEvidence.fxml" />
             </Tab>
             <Tab text="View My Reports">
-                <fx:include fx:id="viewMyReportsTab" source="ViewMyReports.fxml" />
+                <fx:include fx:id="viewMyReportsTab" source="../../victim/reports/ViewMyReports.fxml" />
             </Tab>
         </tabs>
     </TabPane>
