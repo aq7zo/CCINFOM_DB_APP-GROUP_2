@@ -16,59 +16,65 @@ import java.io.IOException;
 
 /**
  * Admin Dashboard Controller
- * Main hub for administrators with 4 report tabs
+ * Main hub for administrators with multiple report tabs.
+ * Handles initialization, tab switching, and logout functionality.
  */
 public class AdminDashboardController {
 
-    @FXML private Label adminNameLabel;
-    @FXML private TabPane tabPane;
-    @FXML private PendingReportsReviewController pendingReportsReviewController;
+    @FXML private Label adminNameLabel; // Label to display the current admin's name
+    @FXML private TabPane tabPane; // TabPane containing different report tabs
+    @FXML private PendingReportsReviewController pendingReportsReviewController; // Nested controller for pending reports
 
-    private Administrator currentAdmin;
+    private Administrator currentAdmin; // Currently logged-in administrator
 
+    /**
+     * Initializes the dashboard controller.
+     * Sets up tab selection listener and ensures nested controllers are ready.
+     */
     @FXML
     private void initialize() {
         System.out.println("AdminDashboardController initialized");
-        
-        // Listen for tab changes to refresh pending reports when tab is selected
+
+        // Add listener to refresh pending reports when "Pending Reports Review" tab is selected
         if (tabPane != null) {
             tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
                 if (newTab != null && "Pending Reports Review".equals(newTab.getText())) {
-                    // Refresh when this tab is selected
-                    Platform.runLater(() -> {
-                        refreshPendingReviewData();
-                    });
+                    // Refresh data on JavaFX Application Thread
+                    Platform.runLater(this::refreshPendingReviewData);
                 }
             });
         }
-        
-        // Try to find the controller after scene is ready
-        Platform.runLater(() -> {
-            pushAdminToPendingController();
-        });
+
+        // Push current admin to nested controller after scene is fully loaded
+        Platform.runLater(this::pushAdminToPendingController);
     }
 
     /**
-     * Set the currently logged-in administrator
-     * Called from AdminLoginController after successful login
+     * Set the currently logged-in administrator.
+     * Called from AdminLoginController after a successful login.
+     *
+     * @param admin The Administrator object representing the logged-in user.
      */
     public void setCurrentAdmin(Administrator admin) {
         this.currentAdmin = admin;
         if (admin != null) {
             String name = admin.getName();
-            // Truncate name if too long (max 30 characters for the name part)
+            // Truncate long names to 30 characters with ellipsis
             if (name != null && name.length() > 30) {
                 name = name.substring(0, 27) + "...";
             }
             adminNameLabel.setText("Admin: " + (name != null ? name : "Unknown"));
             System.out.println("Admin set in dashboard: " + admin.getName());
-            
-            // Find and set admin in pending reports review controller
-            // Use Platform.runLater to ensure scene is fully initialized
+
+            // Push admin to nested controller after UI is ready
             Platform.runLater(this::pushAdminToPendingController);
         }
     }
 
+    /**
+     * Push the current administrator to the PendingReportsReviewController.
+     * Ensures that the nested controller receives the admin information.
+     */
     private void pushAdminToPendingController() {
         if (pendingReportsReviewController != null && currentAdmin != null) {
             pendingReportsReviewController.setCurrentAdmin(currentAdmin);
@@ -77,6 +83,10 @@ public class AdminDashboardController {
         }
     }
 
+    /**
+     * Refresh the pending reports and evidence data in the nested controller.
+     * Called when switching to the "Pending Reports Review" tab.
+     */
     private void refreshPendingReviewData() {
         if (pendingReportsReviewController != null) {
             pendingReportsReviewController.refreshPendingReports();
@@ -87,7 +97,8 @@ public class AdminDashboardController {
     }
 
     /**
-     * Handle logout button click
+     * Handle logout button click.
+     * Loads the login scene and shows an informational alert.
      */
     @FXML
     private void handleLogout() {
@@ -95,12 +106,14 @@ public class AdminDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SceneBuilder/login uis/LogIn.fxml"));
             Parent root = loader.load();
 
+            // Switch to login scene
             Stage stage = (Stage) adminNameLabel.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 450));
             stage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
             stage.centerOnScreen();
             stage.show();
 
+            // Notify admin of successful logout
             showAlert(Alert.AlertType.INFORMATION, "Logged Out", "You have been logged out successfully.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -109,7 +122,11 @@ public class AdminDashboardController {
     }
 
     /**
-     * Show information alert
+     * Show an informational or confirmation alert.
+     *
+     * @param type  Alert type (INFO, WARNING, etc.)
+     * @param title Alert window title
+     * @param msg   Message to display
      */
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
@@ -120,7 +137,9 @@ public class AdminDashboardController {
     }
 
     /**
-     * Show error alert
+     * Show an error alert.
+     *
+     * @param msg Error message to display
      */
     private void showError(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -131,7 +150,10 @@ public class AdminDashboardController {
     }
 
     /**
-     * Get the current admin (for child controllers if needed)
+     * Get the current administrator.
+     * Useful for child controllers that need admin context.
+     *
+     * @return currentAdmin The currently logged-in administrator.
      */
     public Administrator getCurrentAdmin() {
         return currentAdmin;

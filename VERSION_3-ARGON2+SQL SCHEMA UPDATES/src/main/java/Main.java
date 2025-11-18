@@ -12,64 +12,71 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Main JavaFX Application class
- * Entry point for the Cybersecurity Incident Reporting System
+ * Main entry point for the PhishNet - Cybersecurity Incident Reporting System.
+ * Starts the JavaFX application, checks the database connection, loads the login screen,
+ * and handles clean shutdown.
  */
 public class Main extends Application {
 
+    // Path to the app logo (the one without text in the name)
     private static final String APP_ICON_PATH = "/SceneBuilder/assets/ccinfom phishnet logo no name.png";
 
+    /**
+     * Called by JavaFX when the app starts. Sets up the main window,
+     * tests the database, loads LogIn.fxml, and shows the login screen.
+     */
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Ensure application exits when window is closed
+            // Make sure the whole app quits when the last window is closed
             Platform.setImplicitExit(true);
             
-            // Handle window close request
+            // When the user clicks the X button, close everything properly
             primaryStage.setOnCloseRequest(e -> {
-                stop();
-                Platform.exit();
-                System.exit(0);
+                stop();              // close DB connection
+                Platform.exit();     // stop JavaFX
+                System.exit(0);      // terminate JVM
             });
             
-            // Test database connection
+            // Early check: can we actually reach the database?
             if (!DatabaseConnection.testConnection()) {
                 showErrorAndExit("Database Connection Failed",
                         "Could not connect to the database.\n" +
-                                "Please ensure MySQL is running and the database is configured correctly.");
-                return;
+                        "Please ensure MySQL is running and the database is configured correctly.");
+                return; // abort startup if DB is down
             }
 
             System.out.println("Database connection successful!");
 
-            // Load the Victim Login FXML (LogIn.fxml)
-            // Use ClassLoader to get resource (works better with default package)
-            // Note: No leading slash when using ClassLoader
+            // Load the victim's login screen (LogIn.fxml)
             java.net.URL fxmlUrl = Main.class.getClassLoader().getResource("SceneBuilder/login uis/LogIn.fxml");
             if (fxmlUrl == null) {
-                // Try alternative path with leading slash
+                // Sometimes a leading slash is needed - try that too
                 fxmlUrl = Main.class.getClassLoader().getResource("/SceneBuilder/login uis/LogIn.fxml");
             }
             if (fxmlUrl == null) {
+                // Still can't find it - give a clear error message
                 throw new IOException("FXML file not found. Searched for:\n" +
                         "- SceneBuilder/login uis/LogIn.fxml\n" +
                         "- /SceneBuilder/login uis/LogIn.fxml\n" +
                         "Make sure file exists in src/resources/ and run 'mvn clean compile'");
             }
+            
             System.out.println("Loading FXML from: " + fxmlUrl);
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
-            Parent root = loader.load();
+            Parent root = loader.load();   // build the UI from the FXML file
 
-            // Set up the stage
+            // Basic stage/window configuration
             primaryStage.setTitle("PhishNet - Cybersecurity Incident Reporting System");
-            setApplicationIcon(primaryStage);
+            setApplicationIcon(primaryStage);          // put the logo in the title bar
             primaryStage.setScene(new Scene(root, 600, 450));
-            primaryStage.setResizable(false);
-            primaryStage.show();
+            primaryStage.setResizable(false);          // keep the size fixed
+            primaryStage.show();                       // finally show the window
 
             System.out.println("Victim login screen loaded successfully!");
 
         } catch (IOException e) {
+            // Problem loading the FXML - give the user a helpful message
             e.printStackTrace();
             String errorMsg = "Failed to load LogIn.fxml.\n\n";
             errorMsg += "Expected path: /SceneBuilder/login uis/LogIn.fxml\n";
@@ -79,7 +86,9 @@ public class Main extends Application {
             errorMsg += "3. Run 'mvn clean compile' to rebuild\n\n";
             errorMsg += "Error: " + e.getMessage();
             showErrorAndExit("Application Error", errorMsg);
+            
         } catch (Exception e) {
+            // Catch-all for anything unexpected
             e.printStackTrace();
             showErrorAndExit("Unexpected Error",
                     "An unexpected error occurred:\n" + e.getMessage());
@@ -87,7 +96,8 @@ public class Main extends Application {
     }
 
     /**
-     * Load and assign the PhishNet logo as the application icon.
+     * Sets the PhishNet logo as the window icon.
+     * If the icon file is missing, it just prints a warning and continues.
      */
     private void setApplicationIcon(Stage stage) {
         java.net.URL iconUrl = Main.class.getResource(APP_ICON_PATH);
@@ -97,33 +107,36 @@ public class Main extends Application {
         }
 
         Image appIcon = new Image(iconUrl.toExternalForm());
-        stage.getIcons().add(appIcon);
+        stage.getIcons().add(appIcon);   // add the icon to the stage
     }
 
+    /**
+     * Called when the application is shutting down.
+     * Closes the database connection so we don't leave it hanging.
+     */
     @Override
     public void stop() {
-        // Clean up database connection
         DatabaseConnection.closeConnection();
         System.out.println("Application closed. Database connection terminated.");
     }
 
     /**
-     * Show error dialog and exit
+     * Shows an error dialog with the given title/message and then exits the program.
+     * Used for critical failures that prevent the app from running.
      */
     private void showErrorAndExit(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.showAndWait();
-        System.exit(1);
+        alert.showAndWait();   // wait for the user to close the dialog
+        System.exit(1);        // non-zero means error
     }
 
     /**
-     * Main method - entry point
+     * Standard main method - just launches the JavaFX application.
      */
     public static void main(String[] args) {
         launch(args);
     }
 }
-

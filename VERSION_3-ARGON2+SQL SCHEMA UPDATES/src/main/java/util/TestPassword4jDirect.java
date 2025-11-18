@@ -5,9 +5,11 @@ import com.password4j.Argon2Function;
 import com.password4j.types.Argon2;
 
 /**
- * Direct test of password4j to see if there's an issue with our wrapper
+ * Standalone test class to verify that the password4j library works correctly
+ * on its own, bypassing our SecurityUtils wrapper completely.
  */
 public class TestPassword4jDirect {
+    
     public static void main(String[] args) {
         String password = "PhishNetAdmin124";
         
@@ -15,19 +17,19 @@ public class TestPassword4jDirect {
         System.out.println("Password: " + password);
         System.out.println();
         
-        // Create Argon2 function with same parameters as SecurityUtils
+        // Build the exact same Argon2 configuration we use in SecurityUtils
         Argon2Function argon2 = Argon2Function.getInstance(
-            65536,  // Memory cost
-            3,      // Iterations
-            4,      // Parallelism
-            32,     // Hash length
-            Argon2.ID
+            65536,      // memory (64 MB)
+            3,          // iterations
+            4,          // parallelism (4 threads)
+            32,         // output hash length in bytes
+            Argon2.ID   // Argon2id variant (most secure)
         );
         
-        // Generate hash
+        // Step 1: Generate a fresh hash with known-good parameters
         System.out.println("1. Generating hash...");
         String hash = Password.hash(password)
-                .addRandomSalt(16)
+                .addRandomSalt(16)   // 16-byte salt → standard for Argon2id
                 .with(argon2)
                 .getResult();
         
@@ -35,39 +37,40 @@ public class TestPassword4jDirect {
         System.out.println("Hash length: " + hash.length());
         System.out.println();
         
-        // Try verification method 1: withArgon2() without parameters
+        // Step 2: Verify using the simple .withArgon2() method (no config needed)
         System.out.println("2. Testing verification method 1: Password.check().withArgon2()");
         try {
             boolean verified1 = Password.check(password, hash).withArgon2();
-            System.out.println("Result: " + (verified1 ? "✓ SUCCESS" : "✗ FAILED"));
+            System.out.println("Result: " + (verified1 ? "SUCCESS" : "FAILED"));
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
         
-        // Try verification method 2: withArgon2() with explicit function
+        // Step 3: Verify by passing the exact Argon2Function instance
         System.out.println();
         System.out.println("3. Testing verification method 2: Password.check().with(argon2)");
         try {
             boolean verified2 = Password.check(password, hash).with(argon2);
-            System.out.println("Result: " + (verified2 ? "✓ SUCCESS" : "✗ FAILED"));
+            System.out.println("Result: " + (verified2 ? "SUCCESS" : "FAILED"));
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
         
-        // Try verification method 3: Extract parameters from hash
+        // Step 4: Let password4j auto-extract parameters from the hash string
+        // (this is the recommended way — no need to pass Argon2Function manually)
         System.out.println();
-        System.out.println("4. Testing verification method 3: Extract and use parameters");
+        System.out.println("4. Testing verification method 3: Auto-extract parameters from hash");
         try {
-            // password4j should automatically extract parameters from the hash string
-            boolean verified3 = Password.check(password, hash)
-                    .withArgon2();
-            System.out.println("Result: " + (verified3 ? "✓ SUCCESS" : "✗ FAILED"));
+            boolean verified3 = Password.check(password, hash).withArgon2();
+            System.out.println("Result: " + (verified3 ? "SUCCESS" : "FAILED"));
+            if (verified3) {
+                System.out.println("   → password4j correctly read the parameters from the hash string!");
+            }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 }
-
