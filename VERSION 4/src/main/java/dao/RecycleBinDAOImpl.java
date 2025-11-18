@@ -37,6 +37,7 @@ public class RecycleBinDAOImpl implements RecycleBinDAO {
     // SQL for selecting all recycled items
     private static final String SELECT_REPORTS_SQL = "SELECT * FROM RecycleBinReports ORDER BY ArchivedAt DESC";
     private static final String SELECT_EVIDENCE_SQL = "SELECT * FROM RecycleBinEvidence ORDER BY ArchivedAt DESC";
+    private static final String SELECT_EVIDENCE_BY_INCIDENT_SQL = "SELECT * FROM RecycleBinEvidence WHERE IncidentID = ? ORDER BY ArchivedAt DESC";
     // SQL for deleting from recycle bin after restore
     private static final String DELETE_RECYCLE_REPORT_SQL = "DELETE FROM RecycleBinReports WHERE BinID = ?";
     private static final String DELETE_RECYCLE_EVIDENCE_SQL = "DELETE FROM RecycleBinEvidence WHERE BinID = ?";
@@ -138,6 +139,26 @@ public class RecycleBinDAOImpl implements RecycleBinDAO {
             // Loop through all rows
             while (rs.next()) {
                 evidenceList.add(mapRecycleEvidence(rs));  // Convert row to model object
+            }
+        }
+        return evidenceList;
+    }
+
+    /**
+     * Retrieves archived evidence records for a specific incident.
+     */
+    @Override
+    public List<RecycleBinEvidence> findEvidenceByIncidentID(int incidentID) throws SQLException {
+        List<RecycleBinEvidence> evidenceList = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_EVIDENCE_BY_INCIDENT_SQL)) {
+
+            stmt.setInt(1, incidentID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    evidenceList.add(mapRecycleEvidence(rs));
+                }
             }
         }
         return evidenceList;

@@ -21,6 +21,8 @@ public interface RecycleBinDAO {
 
     List<RecycleBinEvidence> findAllEvidence() throws SQLException;
 
+    List<RecycleBinEvidence> findEvidenceByIncidentID(int incidentID) throws SQLException;
+
     boolean restoreIncidentReport(RecycleBinReport archivedReport) throws SQLException;
 
     boolean restoreEvidence(RecycleBinEvidence archivedEvidence) throws SQLException;

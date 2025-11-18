@@ -8,6 +8,8 @@ import dao.IncidentReportDAO;
 import dao.IncidentReportDAOImpl;
 import dao.PerpetratorDAO;
 import dao.PerpetratorDAOImpl;
+import dao.RecycleBinDAO;
+import dao.RecycleBinDAOImpl;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -20,6 +22,7 @@ import model.AttackType;
 import model.Evidence;
 import model.IncidentReport;
 import model.Perpetrator;
+import model.RecycleBinEvidence;
 import model.Victim;
 
 import java.time.LocalDateTime;
@@ -51,6 +54,7 @@ public class ViewMyReportsController {
     private final PerpetratorDAO perpDAO = new PerpetratorDAOImpl();
     private final dao.AdministratorDAO adminDAO = new dao.AdministratorDAOImpl();
     private final EvidenceDAO evidenceDAO = new EvidenceDAOImpl();
+    private final RecycleBinDAO recycleBinDAO = new RecycleBinDAOImpl();
 
     /**
      * Initializes the controller and configures the table columns.
@@ -191,15 +195,22 @@ public class ViewMyReportsController {
     /**
      * Get evidence status summary for a report.
      * Returns a string like "No Evidence", "Pending", "2 Verified, 1 Pending", etc.
+     * Includes both active evidence and rejected evidence from the recycle bin.
      *
      * @param incidentID The incident ID to check
      * @return A summary string of evidence statuses
      */
     private String getEvidenceStatusSummary(int incidentID) {
         try {
+            // Get active evidence from EvidenceUpload table
             List<Evidence> evidenceList = evidenceDAO.findByIncidentID(incidentID);
             
-            if (evidenceList == null || evidenceList.isEmpty()) {
+            // Get rejected evidence from RecycleBinEvidence table
+            List<RecycleBinEvidence> rejectedEvidenceList = recycleBinDAO.findEvidenceByIncidentID(incidentID);
+            
+            // If both lists are empty, return "No Evidence"
+            if ((evidenceList == null || evidenceList.isEmpty()) && 
+                (rejectedEvidenceList == null || rejectedEvidenceList.isEmpty())) {
                 return "No Evidence";
             }
             
@@ -207,23 +218,32 @@ public class ViewMyReportsController {
             int verifiedCount = 0;
             int rejectedCount = 0;
             
-            for (Evidence evidence : evidenceList) {
-                String status = evidence.getVerifiedStatus();
-                if (status == null) {
-                    pendingCount++;
-                } else {
-                    switch (status) {
-                        case "Pending":
-                            pendingCount++;
-                            break;
-                        case "Verified":
-                            verifiedCount++;
-                            break;
-                        case "Rejected":
-                            rejectedCount++;
-                            break;
+            // Count active evidence statuses
+            if (evidenceList != null) {
+                for (Evidence evidence : evidenceList) {
+                    String status = evidence.getVerifiedStatus();
+                    if (status == null) {
+                        pendingCount++;
+                    } else {
+                        switch (status) {
+                            case "Pending":
+                                pendingCount++;
+                                break;
+                            case "Verified":
+                                verifiedCount++;
+                                break;
+                            case "Rejected":
+                                rejectedCount++;
+                                break;
+                        }
                     }
                 }
+            }
+            
+            // Count rejected evidence from recycle bin
+            // All evidence in recycle bin is considered rejected (it was archived when rejected)
+            if (rejectedEvidenceList != null) {
+                rejectedCount += rejectedEvidenceList.size();
             }
             
             // Build summary string
@@ -244,6 +264,7 @@ public class ViewMyReportsController {
             
         } catch (Exception e) {
             System.err.println("Error getting evidence status for incident " + incidentID + ": " + e.getMessage());
+            e.printStackTrace();
             return "Error";
         }
     }
